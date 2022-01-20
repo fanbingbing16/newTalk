@@ -11,6 +11,7 @@ create table userTalk(
     -> id char(10) primary key,
     -> talk text,
     -> date dateTime);
+    
 create table talk(
     -> userId char(20) ,
     -> userName char(10) primary key,
