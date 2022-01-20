@@ -1,0 +1,340 @@
+<template>
+  <div class="chat-box">
+    <div class="welcome">
+      <p>{{ userId }}欢迎您进入聊天室，您可以在这里畅所欲言</p>
+      <el-button
+        type="primary"
+        icon="el-icon-back"
+        circle
+        @click="quitLogin()"
+      ></el-button>
+    </div>
+    <header>聊天室 目前聊天人数{{ count }}</header>
+    <div class="msg-box" ref="msg-box">
+      <div
+        v-for="(i, index) in list"
+        :key="index"
+        class="msg"
+        :style="i.userId == userId ? 'flex-direction:row-reverse' : ''"
+      >
+        <div class="user-head">
+          <div
+            class="head"
+            :style="` background: hsl(${getUserHead(
+              i.userId,
+              'bck'
+            )}, 88%, 62%); clip-path:polygon(${getUserHead(
+              'polygon'
+            )}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(
+              i.userId,
+              'rotate'
+            )}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
+              getUserHead(i.userId, 'boderRadius')[0]
+            }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${
+              getUserHead(i.userId, 'boderRadius')[1]
+            }%;`"
+          ></div>
+          <span v-if="i.userId !== userId" :class="'leftSpan'">{{
+            i.userId
+          }}</span>
+        </div>
+        <div class="user-msg">
+          <!-- :style="i.userId == userId ? ' float: right;' : ''" -->
+          <span :class="i.userId == userId ? 'right' : 'left'">{{
+            i.content
+          }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="input-box">
+      <input
+        type="text"
+        ref="sendMsg"
+        v-model="contentText"
+        @keyup.enter="sendText()"
+      />
+      <div
+        class="btn"
+        :class="{ ['btn-active']: contentText }"
+        @click="sendText()"
+      >
+        发送
+      </div>
+    </div>
+  </div>
+</template>
+ 
+<script>
+export default {
+  data() {
+    return {
+      ws: null,
+      count: 0, //记录聊天人数
+      connectCount: 0, //记录在线人数
+      userId: null, //当前用户ID
+      list: [], //聊天记录的数组
+      contentText: "", //input输入的值
+    };
+  },
+  created() {
+    this.getUserID();
+  },
+  mounted() {
+    this.initWebSocket();
+  },
+  methods: {
+    //退出登录
+    quitLogin() {
+      localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
+      this.$router.push({ path: "/login" });
+    },
+    //根据url(用户名)作为当前用户ID
+    getUserID() {
+      // let time = new Date().getTime();
+      this.userId = window.location.hash.split("/").slice(-1)[0];
+    },
+    //根据userID生成一个随机头像
+    getUserHead(id, type) {
+      //如果id是数字就转字符串，如果是字母加数字或者字母，先转成数字再转字符串
+      let ID = String(isNaN(+id) ? id.charCodeAt() : id);
+      if (type === "bck") {
+        return Number(ID.substring((Math.floor(ID.length / 3) - 3) * 3));
+      } else if (type === "polygon") {
+        return Number(ID.substring((Math.floor(ID.length / 2) - 2) * 3));
+      } else if (type === "rotate") {
+        return Number(ID.substring(ID.length - 3));
+      } else if (type === "boderRadius") {
+        return [
+          Number((+ID / (ID.length * ID)) * 100),
+          (ID.substring(0, 3) / 999) * 100,
+        ];
+      }
+    },
+    //滚动条到底部
+    scrollBottm() {
+      let el = this.$refs["msg-box"];
+      el.scrollTop = el.scrollHeight;
+    },
+    //发送聊天信息
+    sendText() {
+      let _this = this;
+      _this.$refs["sendMsg"].focus();
+      if (!_this.contentText) {
+        return;
+      }
+      let params = {
+        userId: _this.userId,
+        msg: _this.contentText,
+      };
+      _this.ws.send(JSON.stringify(params)); //调用WebSocket send()发送信息的方法
+      _this.contentText = "";
+      setTimeout(() => {
+        _this.scrollBottm();
+      }, 500);
+    },
+    //进入页面创建websocket连接
+    initWebSocket() {
+      let _this = this;
+      //判断页面有没有存在websocket连接
+      if (window.WebSocket) {
+        // 10.0.5.159 是我本地IP地址 此处的 :8181 端口号 要与后端配置的一致
+        let ws = new WebSocket("ws://10.0.5.159:8181");
+        _this.ws = ws;
+        // ws.onopen = function () {
+        //   console.log("服务器连接成功");
+        // };
+        // ws.onclose = function () {
+        //   console.log("服务器连接关闭");
+        // };
+        ws.onerror = function () {
+          alert("您的网络连接不上");
+        };
+        ws.onmessage = function (e) {
+          //接收服务器返回的数据
+          let resData = JSON.parse(e.data);
+          if (resData.funName == "userCount") {
+            _this.connectCount = resData.users;
+            _this.list = resData.chat;
+            console.log(resData.chat);
+            //聊天人数根据list里面的userId统计，利用Set的特性不会把重复的数据放到set里面
+            let userNum = new Set();
+            _this.list.map((item) => {
+              userNum.add(item.userId);
+            });
+            _this.count = userNum.size;
+            console.log(userNum, _this.count);
+          } else {
+            _this.list = [
+              ..._this.list,
+              { userId: resData.userId, content: resData.msg },
+            ];
+          }
+        };
+      }
+    },
+  },
+};
+</script>
+ 
+<style  scoped>
+.chat-box header {
+  position: fixed;
+  width: 100%;
+  height: 3rem;
+  background: #409eff;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  font-size: 1rem;
+}
+.chat-box .msg-box {
+  position: absolute;
+  height: calc(100% - 7.5rem);
+  width: 100%;
+  margin-top: 4rem;
+  overflow-y: scroll;
+}
+.user-head {
+  min-width: 2.5rem;
+  width: 20%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* // position: absolute; */
+}
+.head {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.msg {
+  width: 95%;
+  min-height: 2.5rem;
+  margin: 1rem 0.5rem;
+  position: relative;
+  display: flex;
+  justify-content: flex-start !important;
+}
+.user-msg span {
+  display: inline-block;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.5rem;
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+}
+.rightSpan[data-v-469af010] {
+  width: 1%;
+  font-size: 10px;
+  /* margin-right: 50px; */
+  right: 60px;
+  position: absolute;
+}
+.leftSpan {
+  width: 1%;
+  font-size: 10px;
+  /* margin-left: 20px; */
+  position: absolute;
+  left: 46px;
+}
+
+.left {
+  background: white;
+  animation: toLeft 0.5s ease both 1;
+}
+.right {
+  background: #53a8ff;
+  color: white;
+  animation: toright 0.5s ease both 1;
+}
+@keyframes toLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+@keyframes toright {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+.user-msg {
+  width: 80%;
+  /* // position: absolute; */
+  word-break: break-all;
+  position: relative;
+  z-index: 5;
+}
+.chat-box {
+  margin: 0 auto;
+  background: #fafafa;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  max-width: 700px;
+}
+.input-box input {
+  height: 2.3rem;
+  display: inline-block;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.2rem;
+  font-size: 0.88rem;
+  outline: none;
+}
+.input-box[data-v-469af010] {
+  /* padding: 0 0.5rem; */
+  position: absolute;
+  bottom: 0;
+  width: 36%;
+  height: 3.5rem;
+  background: #fafafa;
+  box-shadow: 0 0 5px #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+}
+.btn {
+  height: 2.3rem;
+  min-width: 4rem;
+  background: #e0e0e0;
+  padding: 0.5rem;
+  font-size: 0.88rem;
+  color: white;
+  text-align: center;
+  border-radius: 0.2rem;
+  margin-left: 0.5rem;
+  transition: 0.5s;
+  line-height: 2.3rem;
+}
+.btn-active {
+  background: #409eff;
+}
+.welcome {
+  background-color: #fff;
+  position: fixed;
+  right: 100px;
+  top: 10%;
+  padding: 10px 10px;
+}
+.input-box input:active {
+  border: 1px solid #66b1ff;
+}
+</style>
