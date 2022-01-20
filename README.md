@@ -4,3 +4,15 @@
 注册用户，会调用接口查询用户的信息是否存在，如果不存在才可以注册
 每个输入框都有表单验证
 成功登录进入就可以多人聊天
+
+创建了两个数据库
+create table userTalk(
+    -> userId char(20) ,
+    -> id char(10) primary key,
+    -> talk text,
+    -> date dateTime);
+create table talk(
+    -> userId char(20) ,
+    -> userName char(10) primary key,
+    -> text char(20),
+    -> password char(20);
