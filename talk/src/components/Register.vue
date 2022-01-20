@@ -144,8 +144,8 @@ export default {
               .post(this.ip + "addStu", {
                 userId: String(this.ruleForm2.age),
                 userName: String(this.ruleForm2.name),
-                password: this.ruleForm2.pass,
-                text: this.ruleForm2.text,
+                password: String(this.ruleForm2.pass),
+                text: String(this.ruleForm2.text),
               })
               .then((response) => {
                 console.log(response, "response");

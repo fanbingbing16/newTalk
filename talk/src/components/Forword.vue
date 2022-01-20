@@ -142,16 +142,18 @@ export default {
           //       text: this.ruleForm2.text,
           //     })
           console.log(this.test,'test')
-          let boo = this.test.some((item) => {
+          let boo = this.test.some((item) => { console.log(item.userId === String(this.ruleForm2.age) ,
+              item.userName === String(this.ruleForm2.name),item.text === String(this.ruleForm2.text),111)
             if (
               item.userId === String(this.ruleForm2.age) &&
-              item.userName === this.ruleForm2.name
+              item.userName === String(this.ruleForm2.name)
             ) {
-              if (item.text === this.ruleForm2.text) {
+              if (item.text === String(this.ruleForm2.text)) {
                 return true;
               }
             }
           });
+         
           if (boo) {
             this.$axios
               .post(this.ip + "updateStu", {

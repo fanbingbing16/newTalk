@@ -108,23 +108,23 @@ export default {
           // let inputData = this.$refs[formName]["_props"].model;
           let boo = this.test.some((item) => {
             console.log(
-              +item.userId,
-              this.ruleForm2.age,
-              +item.userId === this.ruleForm2.age,
+              item.userId,
+              String(this.ruleForm2.age),
+              item.userId === String(this.ruleForm2.age),
               item.password,
-              this.ruleForm2.pass,
-              item.password === this.ruleForm2.pass,
+              String(this.ruleForm2.pass),
+              item.password === String(this.ruleForm2.pass),
               "item"
             );
             if (
-              +item.userId === this.ruleForm2.age &&
-              item.password === this.ruleForm2.pass
+              item.userId === String(this.ruleForm2.age) &&
+              item.password === String(this.ruleForm2.pass)
             ) {
               return true;
             }
           });
           if (boo) {
-            localStorage.setItem("userId", this.ruleForm2.age);//用户登录成功就将用户的id存储在localStorage
+            localStorage.setItem("userId", this.ruleForm2.age); //用户登录成功就将用户的id存储在localStorage
             this.$router.push({ path: "talk/" + this.ruleForm2.age });
           } else {
             this.haveError = true;
