@@ -8,6 +8,12 @@
         circle
         @click="quitLogin()"
       ></el-button>
+      <el-button type="primary" @click="seeHistory(true)" v-if="!isHistory"
+        >查看历史聊天记录</el-button
+      >
+      <el-button type="primary" @click="seeHistory(false)" v-if="isHistory"
+        >隐藏历史聊天记录</el-button
+      >
     </div>
     <header>聊天室 目前聊天人数{{ count }}</header>
     <div class="msg-box" ref="msg-box">
@@ -61,6 +67,27 @@
         发送
       </div>
     </div>
+    <div class="table" v-if="isHistory">
+      <el-table ref="singleTable" :data="curentHistory" style="width: 100%">
+        <el-table-column width="50" property="id"> </el-table-column>
+        <el-table-column property="userId" label="用户名" width="120">
+        </el-table-column
+        ><el-table-column property="talk" label="内容" width="150">
+        </el-table-column
+        ><el-table-column property="date" label="日期" width="150">
+        </el-table-column>
+      </el-table>
+      <div class="block">
+        <el-pagination
+          layout="prev, pager, next"
+          :total="history.length"
+          background
+          :page-size="pageSize"
+          @current-change="pageChange"
+        >
+        </el-pagination>
+      </div>
+    </div>
   </div>
 </template>
  
@@ -74,6 +101,10 @@ export default {
       userId: null, //当前用户ID
       list: [], //聊天记录的数组
       contentText: "", //input输入的值
+      isHistory: false, //是否打开历史记录
+      history: [], //存放所有的历史聊天记录
+      curentHistory: [], //当前页数的历史聊天记录
+      pageSize: 10, //每页的数据
     };
   },
   created() {
@@ -83,6 +114,13 @@ export default {
     this.initWebSocket();
   },
   methods: {
+    //页码改变触发，val是对应的页码
+    pageChange(val) {
+      this.curentHistory = this.history.slice(
+        val - 1 > 0 ? this.pageSize * (val - 1) : 0,
+        val - 1 > 0 ? this.pageSize + this.pageSize * (val - 1) : this.pageSize
+      );
+    },
     //退出登录
     quitLogin() {
       localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
@@ -92,6 +130,10 @@ export default {
     getUserID() {
       // let time = new Date().getTime();
       this.userId = window.location.hash.split("/").slice(-1)[0];
+    },
+    //查看历史聊天记录
+    seeHistory(boo) {
+      this.isHistory = boo;
     },
     //根据userID生成一个随机头像
     getUserHead(id, type) {
@@ -125,6 +167,27 @@ export default {
       let params = {
         userId: _this.userId,
         msg: _this.contentText,
+        date: `${new Date().getFullYear()}-${
+          new Date().getMonth() + 1 > 10
+            ? new Date().getMonth() + 1
+            : "" + new Date().getMonth() + 1
+        }-${
+          new Date().getDate() > 10
+            ? new Date().getDate()
+            : "" + new Date().getDate()
+        } ${
+          new Date().getHours() > 10
+            ? new Date().getHours()
+            : "" + new Date().getHours()
+        }:${
+          new Date().getMinutes() > 10
+            ? new Date().getMinutes()
+            : "" + new Date().getMinutes()
+        }:${
+          new Date().getSeconds() > 10
+            ? new Date().getSeconds()
+            : "" + new Date().getSeconds()
+        }`,
       };
       _this.ws.send(JSON.stringify(params)); //调用WebSocket send()发送信息的方法
       _this.contentText = "";
@@ -152,10 +215,13 @@ export default {
         ws.onmessage = function (e) {
           //接收服务器返回的数据
           let resData = JSON.parse(e.data);
+          _this.history = resData.history;
+          _this.history = _this.history.sort((a, b) => a.id - b.id); //历史记录根据id排序
+          _this.curentHistory = _this.history.slice(0, _this.pageSize); //截取第一页的数据
           if (resData.funName == "userCount") {
             _this.connectCount = resData.users;
             _this.list = resData.chat;
-            console.log(resData.chat);
+            console.log(resData.chat, "list");
             //聊天人数根据list里面的userId统计，利用Set的特性不会把重复的数据放到set里面
             let userNum = new Set();
             _this.list.map((item) => {
@@ -166,9 +232,14 @@ export default {
           } else {
             _this.list = [
               ..._this.list,
-              { userId: resData.userId, content: resData.msg },
+              {
+                userId: resData.userId,
+                content: resData.msg,
+                date: resData.date,
+              },
             ];
           }
+          _this.list = _this.list.sort((a, b) => a.date - b.date);
         };
       }
     },
@@ -336,5 +407,14 @@ export default {
 }
 .input-box input:active {
   border: 1px solid #66b1ff;
+}
+</style>
+<style>
+.table {
+  max-width: 30%;
+  position: fixed;
+  right: 10px;
+  width: 26%;
+  top: 25%;
 }
 </style>
