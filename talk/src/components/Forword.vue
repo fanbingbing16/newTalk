@@ -76,7 +76,7 @@ export default {
       //   !Number.isInteger(value) String(value).length < 3 || String(value).length > 10
       setTimeout(() => {
         if (!/[0-9a-zA-z]{3,10}/.exec(value)) {
-          callback(new Error("只能输入3-10位数字和密码的组合"));
+          callback(new Error("只能输入3-10位数字和字母的组合"));
         } else {
           callback();
         }

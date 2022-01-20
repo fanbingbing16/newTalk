@@ -68,7 +68,7 @@
       </div>
     </div>
     <div class="table" v-if="isHistory">
-      <div class="demo-input-suffix">
+      <div class="demo-input-suffix searchInput">
         <div class="block">
           <el-date-picker v-model="date" type="date" placeholder="选择日期">
           </el-date-picker>
@@ -105,7 +105,9 @@
           @current-change="pageChange"
         >
         </el-pagination>
-        <span v-if="isSearch" style="color:red;">仅仅展示搜索到的{{ pageSize }}条信息 </span>
+        <span v-if="isSearch" style="color: red"
+          >仅仅展示搜索到的{{ pageSize }}条信息
+        </span>
       </div>
     </div>
   </div>
@@ -188,6 +190,8 @@ export default {
     },
     //页码改变触发，val是对应的页码
     pageChange(val) {
+      this.date = "";
+      this.searchText = "";
       this.isSearch = false;
       this.curentHistory = this.history.slice(
         this.pageSize * (val - 1),
@@ -502,6 +506,9 @@ export default {
 }
 </style>
 <style>
+.searchInput input {
+  width: auto;
+}
 .table {
   max-width: 30%;
   position: fixed;
@@ -509,9 +516,7 @@ export default {
   width: 26%;
   top: 25%;
 }
-.el-input__inner {
-  width: auto;
-}
+
 .demo-input-suffix {
   display: flex;
   margin-left: -28px;

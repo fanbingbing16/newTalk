@@ -46,7 +46,7 @@ wss.on('connection', function (ws) {
         console.log('接收到来自' + resData.userId + '的消息：' + resData.msg, resData)
         history.push({ userId: resData.userId, talk: resData.msg, date: resData.date,id:history.length})
         chatList.push({ userId: resData.userId, content: resData.msg, date: resData.date });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
-        let id = chatList.length
+        let id = history.length
         wss.broadcast(JSON.stringify({ userId: resData.userId, msg: resData.msg,date:resData.date, history: history })); //每次发送都相当于广播一次消息
         const sql = 'insert into userTalk(userId,id,talk,date) values (?,?,?,?)'
         console.log('添加', resData)
