@@ -68,6 +68,24 @@
       </div>
     </div>
     <div class="table" v-if="isHistory">
+      <div class="demo-input-suffix">
+        <div class="block">
+          <el-date-picker v-model="date" type="date" placeholder="选择日期">
+          </el-date-picker>
+        </div>
+        <el-input
+          placeholder="请输入用户名"
+          prefix-icon="el-icon-search"
+          v-model="searchText"
+          maxlength="10"
+          minlength="3"
+          style="width: 20%"
+        >
+        </el-input>
+        <el-button type="primary" class="search" @click="search"
+          >搜索</el-button
+        >
+      </div>
       <el-table ref="singleTable" :data="curentHistory" style="width: 100%">
         <el-table-column width="50" property="id"> </el-table-column>
         <el-table-column property="userId" label="用户名" width="120">
@@ -82,10 +100,12 @@
           layout="prev, pager, next"
           :total="history.length"
           background
+          :page-sizes="[100, 200, 300, 400]"
           :page-size="pageSize"
           @current-change="pageChange"
         >
         </el-pagination>
+        <span v-if="isSearch" style="color:red;">仅仅展示搜索到的{{ pageSize }}条信息 </span>
       </div>
     </div>
   </div>
@@ -105,6 +125,9 @@ export default {
       history: [], //存放所有的历史聊天记录
       curentHistory: [], //当前页数的历史聊天记录
       pageSize: 10, //每页的数据
+      date: "",
+      searchText: "",
+      isSearch: false,
     };
   },
   created() {
@@ -114,17 +137,88 @@ export default {
     this.initWebSocket();
   },
   methods: {
+    //搜索历史记录
+    search() {
+      this.isSearch = true;
+      let temp = this.curentHistory;
+      this.curentHistory = [];
+      this.history.map((item) => {
+        if (this.searchText && this.date) {
+          if (
+            item.date.split(" ")[0] ===
+              `${this.date.getFullYear()}-${
+                this.date.getMonth() + 1 > 10
+                  ? this.date.getMonth() + 1
+                  : "" + this.date.getMonth() + 1
+              }-${
+                this.date.getDate() > 10
+                  ? this.date.getDate()
+                  : "" + this.date.getDate()
+              }` &&
+            item.userId === this.searchText
+          ) {
+            this.curentHistory.push(item);
+          }
+        } else if (this.searchText) {
+          if (item.userId === this.searchText) {
+            this.curentHistory.push(item);
+          }
+        } else if (this.date) {
+          if (
+            item.date.split(" ")[0] ===
+            `${this.date.getFullYear()}-${
+              this.date.getMonth() + 1 > 10
+                ? this.date.getMonth() + 1
+                : "" + this.date.getMonth() + 1
+            }-${
+              this.date.getDate() > 10
+                ? this.date.getDate()
+                : "" + this.date.getDate()
+            }`
+          ) {
+            this.curentHistory.push(item);
+          }
+        } else {
+          this.curentHistory = temp;
+        }
+      });
+      if (this.curentHistory.length > this.pageSize) {
+        this.curentHistory = this.curentHistory.slice(0, this.pageSize);
+      }
+    },
     //页码改变触发，val是对应的页码
     pageChange(val) {
+      this.isSearch = false;
       this.curentHistory = this.history.slice(
-        val - 1 > 0 ? this.pageSize * (val - 1) : 0,
-        val - 1 > 0 ? this.pageSize + this.pageSize * (val - 1) : this.pageSize
+        this.pageSize * (val - 1),
+        this.pageSize + this.pageSize * (val - 1)
       );
     },
     //退出登录
     quitLogin() {
-      localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
-      this.$router.push({ path: "/login" });
+      this.$confirm(
+        "您是否要退出登录？退出后只有重新登录才能进入。",
+        "确认信息",
+        {
+          distinguishCancelAndClose: true,
+          confirmButtonText: "确定",
+          cancelButtonText: "点错了",
+        }
+      )
+        .then(() => {
+          this.$message({
+            type: "info",
+            message: "您已退出登录",
+          });
+          localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
+          this.$router.push({ path: "/login" });
+        })
+        .catch((action) => {
+          this.$message({
+            type: "info",
+            message: action === "cancel" ? "停留在该页面" : "您将离开该页面",
+          });
+        });
     },
     //根据url(用户名)作为当前用户ID
     getUserID() {
@@ -187,7 +281,7 @@ export default {
           new Date().getSeconds() > 10
             ? new Date().getSeconds()
             : "" + new Date().getSeconds()
-        }`,
+        }`, //将日期转成年-月-日  时：分：秒的形式
       };
       _this.ws.send(JSON.stringify(params)); //调用WebSocket send()发送信息的方法
       _this.contentText = "";
@@ -221,14 +315,12 @@ export default {
           if (resData.funName == "userCount") {
             _this.connectCount = resData.users;
             _this.list = resData.chat;
-            console.log(resData.chat, "list");
             //聊天人数根据list里面的userId统计，利用Set的特性不会把重复的数据放到set里面
             let userNum = new Set();
             _this.list.map((item) => {
               userNum.add(item.userId);
             });
             _this.count = userNum.size;
-            console.log(userNum, _this.count);
           } else {
             _this.list = [
               ..._this.list,
@@ -416,5 +508,16 @@ export default {
   right: 10px;
   width: 26%;
   top: 25%;
+}
+.el-input__inner {
+  width: auto;
+}
+.demo-input-suffix {
+  display: flex;
+  margin-left: -28px;
+  margin-bottom: 10px;
+}
+button.el-button.search.el-button--primary {
+  margin-left: 25%;
 }
 </style>
