@@ -1,4 +1,4 @@
-# newTalk
+# newTalk  作者张烟铃
 登录、有导航守卫登录拦截，会调用node写的接口去数据库访问数据，判断用户是否输入正确
 
 忘记密码，可以在这里修改密码，会调用接口访问数据，再调用另外一个接口去修改数据库的信息完成修改密码
@@ -9,7 +9,7 @@
 
 成功登录进入就可以多人聊天
 
-创建了两个数据库
+创建了两个mysql数据库
 create table userTalk(
     -> userId char(20) ,
     -> id char(10) primary key,
@@ -21,3 +21,7 @@ create table talk(
     -> userName char(10) primary key,
     -> text char(20),
     -> password char(20);
+    
+   helloword文件下的ip地址需要改成自己电脑的IP地址
+需要用node启动server下的server.js和index.js
+还有vue命令npm run serve
