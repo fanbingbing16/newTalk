@@ -201,7 +201,7 @@ export default {
     //退出登录
     quitLogin() {
       this.$confirm(
-        "您是否要退出登录？退出后只有重新登录才能进入。",
+        "您确定要退出聊天室吗？",
         "确认信息",
         {
           distinguishCancelAndClose: true,
@@ -212,15 +212,16 @@ export default {
         .then(() => {
           this.$message({
             type: "info",
-            message: "您已退出登录",
+            message: "您已退出聊天室",
           });
-          localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
-          this.$router.push({ path: "/login" });
+          // localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
+          // this.$router.push({ path: "/login" });
+          this.$router.push({ path: "select/"+this.userId })
         })
         .catch((action) => {
           this.$message({
             type: "info",
-            message: action === "cancel" ? "停留在该页面" : "您将离开该页面",
+            message: action === "cancel" ? "停留在该页面" : "您已取消",
           });
         });
     },

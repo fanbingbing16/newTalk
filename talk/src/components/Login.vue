@@ -125,7 +125,8 @@ export default {
           });
           if (boo) {
             localStorage.setItem("userId", this.ruleForm2.age); //用户登录成功就将用户的id存储在localStorage
-            this.$router.push({ path: "talk/" + this.ruleForm2.age });
+            // this.$router.push({ path: "talk/" + this.ruleForm2.age });
+            this.$router.push({ path: "select/"+this.ruleForm2.age  })
           } else {
             this.haveError = true;
             return false;

@@ -76,5 +76,32 @@ router.post('/updateStu', (req, res) => {
     }
   })
 })
-
+// 接口：查询医生信息,分页查询
+router.post('/showDoctor', (req, res) => {
+  const sql = $sql.Stu.showDoctor
+  const params = req.body
+  console.log('查询医生',params)
+  conn.query(sql, [params.m,params.n], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }
+  })
+})
+// 接口：查询医生全部信息
+router.get('/showAllDoctor', (req, res) => {
+  const sql = $sql.Stu.showAllDoctor
+  const params = req.body
+  console.log('查询医生',params)
+  conn.query(sql, [], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }
+  })
+})
 module.exports = router

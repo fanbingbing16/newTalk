@@ -9,6 +9,7 @@ import Login from './components/Login'
 import HelloWorld from './components/HelloWorld'
 import Forword from './components/Forword'
 import Register from './components/Register'
+import SelectPeople from './components/SelectPeople'
 Vue.use(VueRouter)
 
 Vue.use(ElementUI)
@@ -24,7 +25,8 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/talk/:id', component: HelloWorld },
   { path: '/forword', component: Forword },
-  { path: '/register', component: Register }
+  { path: '/register', component: Register },
+  { path: '/select/:id', component: SelectPeople },
 ]
 
 // 3. 创建 router 实例，然后传 `routes` 配置
@@ -37,9 +39,9 @@ router.beforeEach((to, from, next) => {
   if (to.path.split('/')[to.path.split('/').length - 2] === 'talk') {
     if (!localStorage.getItem("userId")) {
       next('/login')
-    } else if(localStorage.getItem("userId")!==to.path.split('/')[to.path.split('/').length - 1]) {
+    } else if (localStorage.getItem("userId") !== to.path.split('/')[to.path.split('/').length - 1]) {
       next('/login')
-    }else{
+    } else {
       next()
     }
   } else {

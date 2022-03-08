@@ -11,11 +11,13 @@
 <script>
 // import HelloWorld from "./components/HelloWorld.vue";
 // import Login from "./components/Login"
+// import SelectPeople from './components/SelectPeople.vue'
 export default {
   name: "App",
   components: {
     // HelloWorld,
     // Login,
+    // SelectPeople
   },
   data() {
     return {
