@@ -2,14 +2,19 @@ import Vue from 'vue'
 import App from './App.vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-// import routerr from './router'
+import "@/assets/iconfont/iconfont.css"
 import VueRouter from 'vue-router'
 import axios from 'axios'
 import Login from './components/Login'
 import HelloWorld from './components/HelloWorld'
 import Forword from './components/Forword'
 import Register from './components/Register'
-import SelectPeople from './components/SelectPeople'
+import Select from './components/Select'
+import Mzhengpaiban from './components/Mzhengpaiban'
+import Navigation from './components/Navigation'
+import DoctorDetail from './components/DoctorDetail'
+import MedicalKnowledge from './components/MedicalKnowledge'
+import OnlineConsultation from './components/Onlineconsultation/OnlineConsultation'
 Vue.use(VueRouter)
 
 Vue.use(ElementUI)
@@ -26,7 +31,18 @@ const routes = [
   { path: '/talk/:id', component: HelloWorld },
   { path: '/forword', component: Forword },
   { path: '/register', component: Register },
-  { path: '/select/:id', component: SelectPeople },
+  { path: '/select/:id', component: Select },
+  {
+    path: '/navigation', component: Navigation,
+    children: [
+      { path: 'mengzhengpaiban', component: Mzhengpaiban },
+      { path: ':id/medicalknowledge', component: MedicalKnowledge },
+      { path: 'onlineconsultation', component: OnlineConsultation }
+    ]
+  },
+  {
+    path: '/doctor', component: DoctorDetail
+  }
 ]
 
 // 3. 创建 router 实例，然后传 `routes` 配置
@@ -36,6 +52,7 @@ const router = new VueRouter({
 })
 //路由守卫，防止用户没有登录就进入聊天室
 router.beforeEach((to, from, next) => {
+  //talk是聊天室
   if (to.path.split('/')[to.path.split('/').length - 2] === 'talk') {
     if (!localStorage.getItem("userId")) {
       next('/login')

@@ -117,7 +117,7 @@ export default {
         text: [{ validator: checkText, trigger: "blur" }],
       },
       haveError: false,
-      ip: "http://localhost:3000/api/Stu/",
+      ip: c,
       test: [{}],
     };
   },
@@ -129,11 +129,8 @@ export default {
   },
   methods: {
     submitForm(formName) {
-      console.log(this.test, "test");
-      console.log(this.$refs[formName]["_props"].model, "for");
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          console.log(this.ruleForm2, "rulefor");
           //    this.$axios
           //     .post(this.ip + "addStu", {
           //       userId: this.ruleForm2.age,

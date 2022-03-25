@@ -1,0 +1,58 @@
+{
+  "id": "3261043",
+  "name": "毕设",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "8805216",
+      "name": "Hospital",
+      "font_class": "Hospital",
+      "unicode": "e90f",
+      "unicode_decimal": 59663
+    },
+    {
+      "icon_id": "765326",
+      "name": "问诊",
+      "font_class": "shouye",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "14151210",
+      "name": "收费站",
+      "font_class": "shoufeizhan",
+      "unicode": "e62d",
+      "unicode_decimal": 58925
+    },
+    {
+      "icon_id": "1440379",
+      "name": "门诊排班",
+      "font_class": "menzhenpaiban",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "26847478",
+      "name": "预约挂号面性",
+      "font_class": "yuyueguahaomianxing",
+      "unicode": "e659",
+      "unicode_decimal": 58969
+    },
+    {
+      "icon_id": "26903770",
+      "name": "健康常识",
+      "font_class": "jiankangchangshi",
+      "unicode": "e6e8",
+      "unicode_decimal": 59112
+    },
+    {
+      "icon_id": "6435522",
+      "name": "聊天",
+      "font_class": "liaotian",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    }
+  ]
+}

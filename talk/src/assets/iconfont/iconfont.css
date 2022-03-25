@@ -1,0 +1,43 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3261043 */
+  src: url('iconfont.woff2?t=1648085401740') format('woff2'),
+       url('iconfont.woff?t=1648085401740') format('woff'),
+       url('iconfont.ttf?t=1648085401740') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-Hospital:before {
+  content: "\e90f";
+}
+
+.icon-shouye:before {
+  content: "\e617";
+}
+
+.icon-shoufeizhan:before {
+  content: "\e62d";
+}
+
+.icon-menzhenpaiban:before {
+  content: "\e60c";
+}
+
+.icon-yuyueguahaomianxing:before {
+  content: "\e659";
+}
+
+.icon-jiankangchangshi:before {
+  content: "\e6e8";
+}
+
+.icon-liaotian:before {
+  content: "\e63f";
+}
+

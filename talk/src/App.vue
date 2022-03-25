@@ -1,10 +1,12 @@
 <template>
   <div id="app">
-    <div class="bgcBottom"></div>
-    <div class="bgc"></div>
-    <div class="bgcPink"></div>
-    <div class="bgcBlue"></div>
-    <router-view></router-view>
+    <div class="background-full">
+      <div class="bgcBottom"></div>
+      <div class="bgc"></div>
+      <div class="bgcPink"></div>
+      <div class="bgcBlue"></div>
+    </div>
+    <router-view v-if="isRouterAlive"></router-view>
   </div>
 </template>
 
@@ -13,7 +15,7 @@
 // import Login from "./components/Login"
 // import SelectPeople from './components/SelectPeople.vue'
 export default {
-  name: "App",
+  name: 'App',
   components: {
     // HelloWorld,
     // Login,
@@ -21,31 +23,24 @@ export default {
   },
   data() {
     return {
-      test: [{}],
-      ip: "http://localhost:3000/api/Stu/",
-    };
+      isRouterAlive: true
+    }
   },
-  created() {
-    // this.$axios.get(this.ip + "showStu").then((response) => {
-    //   this.test = response.data;
-    //   // console.log(response.data);
-    // });
-    // this.$axios
-    //   .post(this.ip + "addStu", {
-    //     userId: 123,
-    //     userName: "xiaoxiao",
-    //     password: "123456",
-    //     text: "text",
-    //   })
-    //   .then((response) => {
-    //     console.log(response);
-    //     this.$axios.get(this.ip + "showStu").then((response) => {
-    //       this.test = response.data;
-    //       console.log(response.data);
-    //     });
-    //   });
+  //provide inject 实现组件的局部加载，预约成功之后号源会减一，这个时候就需要局部加载一下页面，其他页面需要局部加载的时候也可以这样
+  provide() {
+    return {
+      reload: this.reload
+    }
   },
-};
+  methods: {
+    reload() {
+      this.isRouterAlive = false
+      this.$nextTick(() => {
+        this.isRouterAlive = true
+      })
+    }
+  }
+}
 </script>
 
 <style>
@@ -62,6 +57,7 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
+  margin-top: 0.1px;
 }
 .bgc {
   background-color: yellow;
@@ -111,5 +107,4 @@ form.el-form.demo-ruleForm {
   width: 29%;
   z-index: 9999;
 }
-
 </style>
