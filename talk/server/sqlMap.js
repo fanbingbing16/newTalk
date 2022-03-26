@@ -16,7 +16,14 @@ const sqlMap = {
     addAuthentication: "update talk set sfz_number=?,authentication='1',real_name=? where userId=?",
     addOrderOfMedicalInsuranceCard: "insert into reservationInformation(userId,id,allergicHistory,medicalInsuranceCard,deatil,time,doctorId,doctorName,part) values (?,?,?,?,?,?,?,?,?)",
     addOrderOfMedicalCard: "insert into reservationInformation(userId,id,allergicHistory,medicalCard,detail,time,doctorId,doctorName,part) values (?,?,?,?,?,?,?,?,?)",
-    substrSignalSource: 'update scheduling set signalSource = ? where doctorId = ? and date = ?'
+    substrSignalSource: 'update scheduling set signalSource = ? where doctorId = ? and date = ?',
+    addOnlineMessage: 'insert into onlinepatientinformation(id,userId,userName,sex,age,email,phone,address,dignosis,drug,infectedImage,allergiHistory,medicalInsuranceCard,medicalCard,detail,fever) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    searchTalk: 'select * from talkDoctor',
+    searchTalkOfTime: 'select * from talkDoctor where time>=? and time<=?',
+    searchTalkOfFrom: 'select * from talkDoctor where from = ?',
+    searchTalkOfTo: 'select * from talkDoctor where to = ?',
+    searchTalkOfFromTo: 'select * from talkDoctor where to = ? and from =?',
+    addTalk:'insert into talkDoctor(doctorId,doctorName,userId,userName,time,text,id,endTime,to,from) values (?,?,?,?,?,?,?,?,?,?)'
   }
 }
 

@@ -1,4 +1,3 @@
-const getId = require('./createId')
 var userNum = 0; //统计在线人数
 var chatList = [];//记录聊天记录
 let history = []//记录历史聊天记录

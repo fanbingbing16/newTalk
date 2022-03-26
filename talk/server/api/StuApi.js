@@ -156,7 +156,6 @@ router.post('/associationQuery', (req, res) => {
   conn.query(sql, [params.id], function (err, result) {
     if (err) {
       throw new Error(err)
-      console.log(err)
     }
     if (result) {
       jsonWrite(res, result)
@@ -255,6 +254,55 @@ router.post('/substrSignalSource', (req, res) => {
       }  // 
     })
   }
-
+})
+//接口，添加用户的线上问诊的信息
+router.post('/addOnlineMessage', (req, res) => {
+  const sql = $sql.Stu.addOnlineMessage
+  const params = req.body
+  const id = createId()
+  console.log('添加问诊信息', params)
+  conn.query(sql, [id, params.userId, params.userName, params.sex,
+    params.age, params.email, params.phone, params.address, params.dignosis, params.drug,
+    params.infectedImage, params.allergiHistory, params.medicalInsuranceCard, params.medicalCard,
+    params.detail, params.fever], function (err, result) {
+      if (err) {
+        console.log(err)
+      }
+      if (result) {
+        console.log(result)
+        jsonWrite(res, result)
+      }  // 
+    })
+})
+// 接口：查询全部聊天记录
+router.get('/searchTalk', (req, res) => {
+  const sql = $sql.Stu.searchTalk
+  const params = req.body
+  console.log(params, '查询病人和医生的聊天记录')
+  conn.query(sql, [], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }
+  })
+})
+// 接口：根据时间查询聊天记录
+router.post('/associationQuery', (req, res) => {
+  const sql = $sql.Stu.associationQuery
+  const params = req.body
+  console.log('时间 查询聊天记录', params)
+  if (!params.time) {
+    throw new Error('时间必须传')
+  }
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
 })
 module.exports = router

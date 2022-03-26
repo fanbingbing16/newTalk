@@ -1,29 +1,4 @@
-// const mysql = require('mysql')
-// let data = []
-// var connection = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: "123456",
-//     database: "mysql"
-// })
-// connection.connect()
-// connection.query("select * from students", [], function (err, result) {
-//     data.push(result)
-// });
-// connection.query("insert into talk (userId) value ('122')", [], function (err, result) {
-//     console.log(err,result)
-// });
-// connection.end();
-// const http = require("http")
-// const server = http.createServer(function (request, response) {
-//     console.log(request.method + ':' + request.url);
-//     response.writeHead(200, { 'Content-type': 'text/html' });
-//     response.end(JSON.stringify(data))
-// })
 
-// server.listen(8088)
-// console.log('8080启动');
-// node 后端服务器
 const StuApi = require('./api/StuApi')
 const fs = require('fs')
 const path = require('path')
