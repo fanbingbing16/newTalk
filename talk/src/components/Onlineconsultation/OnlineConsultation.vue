@@ -1,8 +1,8 @@
 <template>
   <div class="online">
-    <div class="background-grey" v-if="showValidRz"></div>
+    <div class="background-grey" v-if="showValidRz || showBaseMessage"></div>
     <Sfz v-if="showValidRz" @authentication="authentication" @cancle="cancle"></Sfz>
-    <InputBaseMessage v-if="!showValidRz && showBaseMessage"></InputBaseMessage>
+    <InputBaseMessage v-if="!showValidRz && showBaseMessage" @confirm="conform"></InputBaseMessage>
   </div>
 </template>
 <script>
@@ -58,6 +58,10 @@ export default {
       this.showValidRz = false
       this.$router.push({ path: 'mengzhengpaiban' })
       this.reload()
+    },
+    conform() {
+      this.showBaseMessage = false
+      this.$router.push({ path: '/talkdoctor' })
     }
   }
 }

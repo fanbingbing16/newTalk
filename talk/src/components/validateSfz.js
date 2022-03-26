@@ -1,3 +1,29 @@
+/* 是否邮箱*/
+export function isEmail(rule, value, callback) {
+  const reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (value == '' || value == undefined || value == null) {
+    callback();
+  } else {
+    if (!reg.test(value)) {
+      callback(new Error('请输入正确的邮箱地址'));
+    } else {
+      callback();
+    }
+  }
+}
+/* 是否手机号码*/
+export function isPhone(rule, value, callback) {
+  const reg = /^[1][3,4,5,7,8][0-9]{9}$/;
+  if (value == '' || value == undefined || value == null) {
+    callback();
+  } else {
+    if ((!reg.test(value)) && value != '') {
+      callback(new Error('请输入正确的电话号码'));
+    } else {
+      callback();
+    }
+  }
+}
 export function validateSfz(rule, value, callback) {
   if (!value) {
     return callback(new Error('身份证号码不能为空'));

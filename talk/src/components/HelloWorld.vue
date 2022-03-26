@@ -165,6 +165,7 @@ export default {
     //发送聊天信息
     sendText() {
       let _this = this
+      //将焦点集中在这里
       _this.$refs['sendMsg'].focus()
       if (!_this.contentText) {
         return
@@ -176,7 +177,7 @@ export default {
           new Date().getHours() > 10 ? new Date().getHours() : '0' + new Date().getHours()
         }:${new Date().getMinutes() > 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() > 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}` //将日期转成年-月-日  时：分：秒的形式
       }
-      _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法
+      _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法，向服务端发送数据
       _this.contentText = ''
       setTimeout(() => {
         _this.scrollBottm()
@@ -196,6 +197,7 @@ export default {
         // ws.onclose = function () {
         //   console.log("服务器连接关闭");
         // };
+        //通信发生错误
         ws.onerror = function () {
           alert('您的网络连接不上')
         }

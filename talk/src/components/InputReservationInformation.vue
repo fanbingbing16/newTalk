@@ -30,7 +30,7 @@
 </template>
 <script>
 export default {
-  props: ['date', 'time', 'doctorMessage','disable'],
+  props: ['date', 'time', 'doctorMessage', 'signalSource'],
   inject: ['reload'],
   created() {
     let userId = localStorage.getItem('userId')
@@ -68,7 +68,7 @@ export default {
       if (this.ruleForm.fever) {
         this.$message({
           type: 'info',
-          message: '发热请及时到医院就诊，无需预约'
+          message: '发热请及时到医院就诊，无需预约,无法线上就诊'
         })
       } else {
         this.$refs[formName].validate(valid => {
@@ -117,56 +117,61 @@ export default {
       }
     },
     addOrder() {
-      let date = new Date(this.date)
-      let time = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${this.time}`).getTime()
-      let userId = localStorage.getItem('userId')
-      let params
-      if (this.ruleForm.isMedicalInsuranceCard) {
-        params = {
-          userId,
-          allergicHistory: this.ruleForm.allergicHistory,
-          medicalInsuranceCard: parseInt(this.ruleForm.medicalInsuranceCard),
-          detail: this.ruleForm.detail,
-          time,
-          doctorId: this.doctorMessage.id,
-          doctorName: this.doctorMessage.name,
-          part: this.doctorMessage.part
+      // 如果父亲传了时间过来那就是预约，号源要减一，否则是线上问诊，还有其他信息需要做
+      if (this.date) {
+        let date = new Date(this.date)
+        let time = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${this.time}`).getTime()
+        let userId = localStorage.getItem('userId')
+        let params
+        if (this.ruleForm.isMedicalInsuranceCard) {
+          params = {
+            userId,
+            allergicHistory: this.ruleForm.allergicHistory,
+            medicalInsuranceCard: parseInt(this.ruleForm.medicalInsuranceCard),
+            detail: this.ruleForm.detail,
+            time,
+            doctorId: this.doctorMessage.id,
+            doctorName: this.doctorMessage.name,
+            part: this.doctorMessage.part
+          }
+        } else {
+          params = {
+            userId,
+            allergicHistory: this.ruleForm.allergicHistory,
+            medicalCard: parseInt(this.ruleForm.medicalCard),
+            detail: this.ruleForm.detail,
+            time,
+            doctorId: this.doctorMessage.id,
+            doctorName: this.doctorMessage.name,
+            part: this.doctorMessage.part
+          }
         }
-      } else {
-        params = {
-          userId,
-          allergicHistory: this.ruleForm.allergicHistory,
-          medicalCard: parseInt(this.ruleForm.medicalCard),
-          detail: this.ruleForm.detail,
-          time,
-          doctorId: this.doctorMessage.id,
-          doctorName: this.doctorMessage.name,
-          part: this.doctorMessage.part
-        }
-      }
 
-      this.$axios.post('http://localhost:3000/api/Stu/addOrder', params).then(response => {
-        if (response.status === 200) {
-          this.$axios
-            .post('http://localhost:3000/api/Stu/substrSignalSource', { signalSource: this.doctorMessage.signalSource - 1, doctorId: this.doctorMessage.id, date: this.doctorMessage.date })
-            .then(res => {
-              console.log(res, '减号源')
-              if (typeof res.data === 'string') {
-                this.$message({
-                  type: 'info',
-                  message: res.data
-                })
-              } else if (res.status === 200) {
-                this.$message({
-                  message: '恭喜你,预约成功',
-                  type: 'success'
-                })
-                this.reload()
-              }
-            })
-            .catch(err => console.log(err))
-        }
-      })
+        this.$axios.post('http://localhost:3000/api/Stu/addOrder', params).then(response => {
+          if (response.status === 200) {
+            this.$axios
+              .post('http://localhost:3000/api/Stu/substrSignalSource', { signalSource: this.signalSource - 1, doctorId: this.doctorMessage.id, date: this.date })
+              .then(res => {
+                console.log(res, '减号源')
+                if (typeof res.data === 'string') {
+                  this.$message({
+                    type: 'info',
+                    message: res.data
+                  })
+                } else if (res.status === 200) {
+                  this.$message({
+                    message: '恭喜你,预约成功',
+                    type: 'success'
+                  })
+                  this.reload()
+                }
+              })
+              .catch(err => console.log(err))
+          }
+        })
+      } else {
+        this.$emit('isOnlie', this.ruleForm)
+      }
     }
   }
 }

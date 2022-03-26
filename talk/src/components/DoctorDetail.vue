@@ -12,10 +12,12 @@
     </div>
     <div class="background-grey" v-if="(showModel && this.date.length > 0) || showValidRz"></div>
     <Sfz v-if="showValidRz" @authentication="authentication" @cancle="showValidRz = false"></Sfz>
-    <InputReservationInformation v-if="showInformation" @cancle="showInformation = false" :date="this.selectTime" :time="detailTime" :doctorMessage="data"></InputReservationInformation>
+    <InputReservationInformation v-if="showInformation" @cancle="showInformation = false" :date="this.selectTime" :time="detailTime" :doctorMessage="data" :signalSource="selectSignalSource"></InputReservationInformation>
     <div class="model" v-if="showModel && this.date.length > 0">
       <p>请您选择一个时间</p>
-      <span v-for="(dateOne, index) in date" :key="index" :class="{ 'click-Time': selectTime === dateOne }" @click="changeClick(dateOne)"> {{ new Date(dateOne).getMonth() + 1 }}-{{ new Date(dateOne).getDate() }} {{ dateOne | formatDate }} 号源{{ signalSource[index] }}&nbsp; </span>
+      <span v-for="(dateOne, index) in date" :key="index" :class="{ 'click-Time': selectTime === dateOne }" @click="changeClick(dateOne, signalSource[index])">
+        {{ new Date(dateOne).getMonth() + 1 }}-{{ new Date(dateOne).getDate() }} {{ dateOne | formatDate }} 号源{{ signalSource[index] }}&nbsp;
+      </span>
       <br />
       <el-time-select
         :disabled="String(selectTime).length <= 0"
@@ -50,6 +52,7 @@ export default {
         // let arry = response.data[0].image.data
         if (response && response.status === 200) {
           this.image = this.image + response.data[0].image //转换字符串
+          console.log(response, 'doctorDetail')
           this.data = response.data[0]
           this.date = response.data.filter(item => {
             if (item.signalSource > 0) {
@@ -63,7 +66,7 @@ export default {
         }
       })
       .catch(err => {
-        console.log(err,'错误')
+        console.log(err, '错误')
       })
   },
   data() {
@@ -78,6 +81,7 @@ export default {
       detailTime: '',
       //身份认证
       showValidRz: false,
+      selectSignalSource: 0,
       //预约问诊要填写信息
       showInformation: false
     }
@@ -95,9 +99,10 @@ export default {
     getStartEndTime() {
       return [new Date(this.selectTime).getHours() >= 4 && new Date(this.selectTime).getHours() <= 12 ? '8:30' : '12:00', new Date(this.selectTime).getHours() >= 4 && new Date(this.selectTime).getHours() <= 12 ? '12:00' : '18:30']
     },
-    changeClick(time) {
+    changeClick(time, signalSource) {
       this.detailTime = ''
       this.selectTime = time
+      this.selectSignalSource = signalSource
     },
     cancleModel() {
       this.showModel = false
@@ -116,7 +121,7 @@ export default {
       this.showModel = true
       let userId = localStorage.getItem('userId')
       this.$axios.post('http://localhost:3000/api/Stu/addAuthentication', { sfz_number: authentication.id_number, real_name: authentication.name, userId: userId }).then(res => {
-        console.log(res,'成功')
+        console.log(res, '成功')
       })
     }
   },

@@ -15,6 +15,7 @@ import Navigation from './components/Navigation'
 import DoctorDetail from './components/DoctorDetail'
 import MedicalKnowledge from './components/MedicalKnowledge'
 import OnlineConsultation from './components/Onlineconsultation/OnlineConsultation'
+import Talk from './components/Onlineconsultation/Talk'
 Vue.use(VueRouter)
 
 Vue.use(ElementUI)
@@ -37,9 +38,12 @@ const routes = [
     children: [
       { path: 'mengzhengpaiban', component: Mzhengpaiban },
       { path: ':id/medicalknowledge', component: MedicalKnowledge },
-      { path: 'onlineconsultation', component: OnlineConsultation }
+      {
+        path: 'onlineconsultation', component: OnlineConsultation
+      }
     ]
   },
+  { path: '/talkdoctor', component: Talk },
   {
     path: '/doctor', component: DoctorDetail
   }
