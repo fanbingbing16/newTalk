@@ -206,6 +206,21 @@ router.get('/searchKnowledge', (req, res) => {
     }  // 
   })
 })
+//接口，根据医生的id查询预约记录
+router.post('/searchOrderOfDoctor', (req, res) => {
+  const sql = $sql.Stu.searchOrderOfDoctor
+  const params = req.body
+  console.log('根据医生的id查询预约记录', params)
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
 //接口,添加预约信息
 router.post('/addOrder', (req, res) => {
   let id = createId()
@@ -214,7 +229,7 @@ router.post('/addOrder', (req, res) => {
   //就诊卡或者医保卡信息填入
   if (params.medicalCard) {
     const sql = $sql.Stu.addOrderOfMedicalCard
-    conn.query(sql, [params.userId, id, params.allergicHistory, params.medicalCard, params.detail, params.time, params.doctorId, params.doctorName, params.part], function (err, result) {
+    conn.query(sql, [params.userId, id, params.allergicHistory, params.medicalCard, params.detail, params.time, params.doctorId, params.doctorName, params.part, params.sex], function (err, result) {
       if (err) {
         console.log(err)
       }
@@ -225,7 +240,7 @@ router.post('/addOrder', (req, res) => {
     })
   } else {
     const sql = $sql.Stu.addOrderOfMedicalInsuranceCard
-    conn.query(sql, [params.userId, id, params.allergicHistory, params.medicalInsuranceCard, params.deatil, params.time, params.doctorId, params.doctorName, params.part], function (err, result) {
+    conn.query(sql, [params.userId, id, params.allergicHistory, params.medicalInsuranceCard, params.deatil, params.time, params.doctorId, params.doctorName, params.part, params.sex], function (err, result) {
       if (err) {
         console.log(err)
       }
@@ -289,19 +304,158 @@ router.get('/searchTalk', (req, res) => {
   })
 })
 // 接口：根据时间查询聊天记录
-router.post('/associationQuery', (req, res) => {
-  const sql = $sql.Stu.associationQuery
+router.post('/searchTalkOfTime', (req, res) => {
+  const sql = $sql.Stu.searchTalkOfTime
   const params = req.body
   console.log('时间 查询聊天记录', params)
-  if (!params.time) {
+  if (!params.startTime || !params.endTime) {
     throw new Error('时间必须传')
   }
-  conn.query(sql, [params.id], function (err, result) {
+  conn.query(sql, [params.startTime, params.endTime], function (err, result) {
     if (err) {
       throw new Error(err)
     }
     if (result) {
       jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：根据发送人查询聊天记录
+router.post('/searchTalkOfFrom', (req, res) => {
+  const sql = $sql.Stu.searchTalkOfFrom
+  const params = req.body
+  console.log('searchTalkOfFrom 查询聊天记录', params)
+  conn.query(sql, [params.from], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：根据接收人查询聊天记录
+router.post('/searchTalkOfTo', (req, res) => {
+  const sql = $sql.Stu.searchTalkOfFrom
+  const params = req.body
+  console.log('searchTalkOfTo 查询聊天记录', params)
+  conn.query(sql, [params.to], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：根据接收人和发送人查询聊天记录
+router.post('/searchTalkOfFromTo', (req, res) => {
+  const sql = $sql.Stu.searchTalkOfFromTo
+  const params = req.body
+  console.log('searchTalkOfFromTo 查询聊天记录', params)
+  conn.query(sql, [params.from, params.to], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+//接口，增加聊天记录
+router.post('/addTalk', (req, res) => {
+  const sql = $sql.Stu.addTalk
+  const params = req.body
+  const id = createId()
+  console.log('增加聊天记录', params)
+  conn.query(sql, [params.doctorId, params.doctorName, params.userId, params.userName, params.time, params.text, id, params.endTime, params.to, params.from], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：根据用户id查询用户需要交钱的订单
+router.post('/searchMedicalMessage', (req, res) => {
+  const sql = $sql.Stu.searchMedicalMessage
+  const params = req.body
+  console.log('searchMedicalMessage 查询订单', params)
+  conn.query(sql, [params.userId], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+//接口，交钱之后更新数据
+router.post('/updateMedicalMessage', (req, res) => {
+  const sql = $sql.Stu.updateMedicalMessage
+  const params = req.body
+  console.log('更新订单数据', params)
+  // totalPay = ?,wellPayment = ? where id = ?
+  conn.query(sql, [params.totalPay, params.wellPayment, params.id], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：查询医生 医生登录所用
+router.get('/searchDoctorUser', (req, res) => {
+  const sql = $sql.Stu.searchDoctorUser
+  const params = req.body
+  console.log('searchDoctorUser 查询医生', params)
+  conn.query(sql, [], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：修改医生登录密码
+router.post('/updataPassOfDoctor', (req, res) => {
+  const sql = $sql.Stu.updataPassOfDoctor
+  const params = req.body
+  console.log('updataPassOfDoctor 查询医生', params)
+  conn.query(sql, [params.password, params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：增加医生
+router.post('/addDoctorUser', (req, res) => {
+  const sql = $sql.Stu.addDoctorUser
+  const params = req.body
+  const id = createId()
+  console.log('addDoctorUser 增加医生', params)
+  conn.query(sql, [id, params.name, params.password, params.text, params.sf_number, params.phone, params.email], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      // jsonWrite(res, result)
+      conn.query($sql.Stu.addDoctor, [id, params.name, params.part, params.title, params.sex, params.image, params.detail], function (err, result) {
+        if (err) {
+          throw new Error(err)
+        }
+        if (result) {
+          jsonWrite(res, result)
+        }
+      })
     }  // 
   })
 })

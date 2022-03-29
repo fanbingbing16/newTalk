@@ -24,8 +24,20 @@ connection.query('select * from userTalk', [], function (err, result) {
         // console.log(history, 'history', result);
         a.map(item => {
             //数据库返回的数据存储到chatList
-            if (new Date(item.date).getDate() === date) {
-                chatList.push({ userId: item.userId, content: item.talk, date: item.date })
+            if (new Date(item.date).getDate() === date && item.isDoctor) {
+                // chatList.push({ userId: item.userId, content: item.talk, date: item.date, isDoctor: item.isDoctor })
+                connection.query('select * from doctor where id = ?', [item.userId], function (err2, result2) {
+                    if (err2) {
+                        console.log(err)
+                    }
+                    if (result2) {
+                        let doctor = JSON.parse(JSON.stringify(result2))
+                        chatList.push({ userId: item.userId, content: item.talk, date: item.date, isDoctor: item.isDoctor, image: doctor[0].image, userName: item.userName })
+                    }
+                })
+            }
+            else if (new Date(item.date).getDate() === date) {
+                chatList.push({ userId: item.userId, content: item.talk, date: item.date, isDoctor: item.isDoctor, image: null, userName: null })
             }
         })
     }
@@ -45,7 +57,7 @@ wss.on('connection', function (ws) {
         var resData = JSON.parse(e)
         console.log('接收到来自' + resData.userId + '的消息：' + resData.msg, resData)
         history.push({ userId: resData.userId, talk: resData.msg, date: resData.date, id: history.length })
-        chatList.push({ userId: resData.userId, content: resData.msg, date: resData.date });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
+        chatList.push({ userId: resData.userId, content: resData.msg, date: resData.date, isDoctor: resData.isDoctor, image: resData.image, userName: resData.userName });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
         //利用随机数和时间戳生成随机数
         function createId() {
             let word = 'abcdefghijklmnopqrstuvwxyz'
@@ -62,14 +74,25 @@ wss.on('connection', function (ws) {
         }
         let id = createId()
         console.log(id, 'id')
-        wss.broadcast(JSON.stringify({ userId: resData.userId, msg: resData.msg, date: resData.date, history: history })); //每次发送都相当于广播一次消息
-        const sql = 'insert into userTalk(userId,id,talk,date) values (?,?,?,?)'
-        console.log('添加', resData)
-        connection.query(sql, [resData.userId, id, resData.msg, resData.date], function (err, result) {
-            if (err) {
-                console.log(err)
-            }
-        })
+        wss.broadcast(JSON.stringify({ userId: resData.userId, msg: resData.msg, date: resData.date, isDoctor: resData.isDoctor, image: resData.image, userName: resData.userName, history: history })); //每次发送都相当于广播一次消息
+        if (resData.isDoctor === 'true') {
+            const sql = 'insert into userTalk(userId,id,talk,date,isDoctor,userName) values (?,?,?,?,?,?)'
+            console.log('添加', resData)
+            connection.query(sql, [resData.userId, id, resData.msg, resData.date, resData.isDoctor, resData.userName], function (err, result) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        } else {
+            const sql = 'insert into userTalk(userId,id,talk,date) values (?,?,?,?)'
+            console.log('添加', resData)
+            connection.query(sql, [resData.userId, id, resData.msg, resData.date], function (err, result) {
+                if (err) {
+                    console.log(err)
+                }
+            })
+        }
+
     });
     ws.on('close', function (e) {
         if (userNum > 0) {
