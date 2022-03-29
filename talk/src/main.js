@@ -16,6 +16,16 @@ import DoctorDetail from './components/DoctorDetail'
 import MedicalKnowledge from './components/MedicalKnowledge'
 import OnlineConsultation from './components/Onlineconsultation/OnlineConsultation'
 import Talk from './components/Onlineconsultation/Talk'
+import Charge from './components/Charge'
+import ChargeMoney from './components/ChargeMoney'
+import RegisterDoctor from './components/RegisterDoctor'
+import Reservation from './components/Reservation'
+const originalPush = VueRouter.prototype.push
+
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 Vue.use(VueRouter)
 
 Vue.use(ElementUI)
@@ -40,12 +50,22 @@ const routes = [
       { path: ':id/medicalknowledge', component: MedicalKnowledge },
       {
         path: 'onlineconsultation', component: OnlineConsultation
-      }
+      },
+      {
+        path: 'charge', component: Charge
+      },
+      { path: 'reservation', component: Reservation }
     ]
   },
-  { path: '/talkdoctor', component: Talk },
+  { path: '/talkdoctor/:id', component: Talk },
   {
     path: '/doctor', component: DoctorDetail
+  },
+  {
+    path: '/chargeMoney/:id', name: 'ChargeMoney', component: ChargeMoney
+  },
+  {
+    path: '/doctor/register', component: RegisterDoctor
   }
 ]
 

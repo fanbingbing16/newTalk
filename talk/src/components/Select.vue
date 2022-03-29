@@ -20,7 +20,7 @@
       <div @click="jumpPage('talk', 1)"><i class="iconfont icon-liaotian" style="font-size: 30px"></i>聊天室</div>
       <div @click="jumpPage('1/medicalKnowledge')"><i class="iconfont icon-jiankangchangshi" style="font-size: 30px"></i>医学常识</div>
       <div @click="jumpPage('onlineconsultation')"><i class="iconfont icon-shouye" style="font-size: 30px"></i>线上问诊</div>
-      <div><i class="iconfont icon-shoufeizhan" style="font-size: 30px"></i>收费站</div>
+      <div @click="jumpPage('charge')"><i class="iconfont icon-shoufeizhan" style="font-size: 30px"></i>收费站</div>
       <div @click="jumpPage('mengzhengpaiban')"><i class="iconfont icon-menzhenpaiban" style="font-size: 30px"></i>门诊排班</div>
       <div @click="jumpPage('mengzhengpaiban')"><i class="iconfont icon-yuyueguahaomianxing" style="font-size: 30px"></i>预约挂号</div>
     </div>
@@ -95,6 +95,7 @@ export default {
           localStorage.removeItem('userId')
           localStorage.removeItem('doctorId')
           localStorage.removeItem('authentication')
+          localStorage.removeItem('isDoctor')
           this.$router.push({ path: '/login' })
         })
         .catch(() => {

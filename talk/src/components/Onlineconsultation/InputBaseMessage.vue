@@ -1,6 +1,6 @@
 <template>
   <div class="baseMessage">
-    <input-reservation-information v-if="showReservation" @isOnlie="confirmReservation"></input-reservation-information>
+    <input-reservation-information v-if="showReservation" @isOnlie="confirmReservation" @cancle="$router.push({ path: 'mengzhengpaiban' })"></input-reservation-information>
     <div v-else class="baseMessageDiv">
       <p>请您先输入您的基本信息！</p>
       <el-form ref="Form" :rules="rules" status-icon :model="edit" label-width="100px">
@@ -146,7 +146,7 @@ export default {
             type: 'success'
           })
           let userId = localStorage.getItem('userId')
-          this.$emit('confirm',true)
+          this.$emit('confirm', true)
           this.$axios.post('http://localhost:3000/api/Stu/addOnlineMessage', {
             userId,
             userName: this.edit.name,

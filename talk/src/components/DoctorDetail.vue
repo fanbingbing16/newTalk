@@ -39,6 +39,7 @@
 <script>
 import Sfz from './Sfz'
 import InputReservationInformation from './InputReservationInformation'
+import { getTime } from './getTime.js'
 export default {
   components: {
     Sfz,
@@ -72,7 +73,7 @@ export default {
   data() {
     return {
       //医生的图片采用base64存储
-      image: 'data:image/jpg;base64,',
+      image: '',
       data: {},
       date: [],
       signalSource: [],
@@ -127,8 +128,9 @@ export default {
   },
   filters: {
     formatDate(date) {
-      let time = new Date(date).getHours() >= 4 && new Date(date).getHours() <= 12 ? '上午' : '下午'
-      return '周' + '日一二三四五六'[new Date(date).getDay()] + time
+      // let time = new Date(date).getHours() >= 4 && new Date(date).getHours() <= 12 ? '上午' : '下午'
+      // return '周' + '日一二三四五六'[new Date(date).getDay()] + time
+      return getTime(date)
     }
   }
 }
@@ -139,12 +141,6 @@ export default {
 }
 img {
   max-width: 170px;
-}
-.image {
-  width: 170px;
-  height: 100px;
-  overflow: hidden;
-  margin-left: -176px;
 }
 p.title {
   font-size: 66px;
@@ -189,5 +185,11 @@ p.name {
   background: grey;
   top: 0;
   opacity: 0.5;
+}
+.image {
+  width: 170px;
+  height: 100px;
+  overflow: hidden;
+  margin-left: -176px;
 }
 </style>

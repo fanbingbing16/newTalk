@@ -16,6 +16,9 @@
       <el-button @click="resetForm('ruleForm2')">重置</el-button>
       <router-link to="/forword" class="forword">忘记密码</router-link>
     </el-form-item>
+    <el-form-item>
+      <el-button @click="DoctorLogin('ruleForm2')">医生登录</el-button>
+    </el-form-item>
   </el-form>
 </template>
 <script>
@@ -27,8 +30,8 @@ export default {
       }
       //   !Number.isInteger(value) String(value).length < 3 || String(value).length > 10
       setTimeout(() => {
-        if (!/[0-9a-zA-z]{3,10}/.exec(value)) {
-          callback(new Error('只能输入3-10位数字和字母的组合'))
+        if (!/.{2,10}/.exec(value)) {
+          callback(new Error('只能输入2-10位'))
         } else {
           callback()
         }
@@ -105,6 +108,32 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+    },
+    DoctorLogin(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          let id = ''
+          this.$axios.get(this.ip + 'searchDoctorUser').then(response => {
+            let boo = response.data.some(item => {
+              if (item.name === this.ruleForm2.age) {
+                if (item.password === this.ruleForm2.pass) {
+                  id = item.id
+                  return true
+                }
+              }
+            })
+            if (boo) {
+              localStorage.setItem('userId', id)
+              localStorage.setItem('isDoctor', true)
+              this.$router.push({ path: '/navigation/1/medicalKnowledge' })
+            } else {
+              this.haveError = true
+            }
+          })
+        } else {
+          this.haveError = true
+        }
+      })
     }
   }
 }

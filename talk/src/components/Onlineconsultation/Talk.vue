@@ -1,26 +1,19 @@
 <template>
   <div class="chat-box">
-    <div class="welcome">
-      <p>{{ userId }}欢迎您进入聊天室，您可以在这里畅所欲言</p>
-      <el-button type="primary" icon="el-icon-back" circle @click="quitLogin()"></el-button>
-      <el-button type="primary" @click="seeHistory(true)" v-if="!isHistory">查看历史聊天记录</el-button>
-      <el-button type="primary" @click="seeHistory(false)" v-if="isHistory">隐藏历史聊天记录</el-button>
-    </div>
-    <header>聊天室 目前聊天人数{{ count }}</header>
     <div class="msg-box" ref="msg-box">
-      <div v-for="(i, index) in list" :key="index" class="msg" :style="i.userId == userId ? 'flex-direction:row-reverse' : ''">
+      <div v-for="(i, index) in list" :key="index" class="msg" :style="i.from == userId ? 'flex-direction:row-reverse' : ''">
         <div class="user-head">
           <div
             class="head"
-            :style="` background: hsl(${getUserHead(i.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
-              getUserHead(i.userId, 'boderRadius')[0]
-            }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.userId, 'boderRadius')[1]}%;`"
+            :style="` background: hsl(${getUserHead(i.from, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
+              getUserHead(i.from, 'boderRadius')[0]
+            }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.from, 'boderRadius')[1]}%;`"
           ></div>
-          <span v-if="i.userId !== userId" :class="'leftSpan'">{{ i.userId }}</span>
+          <span v-if="i.from !== userId" :class="'leftSpan'">{{ i.from }}</span>
         </div>
         <div class="user-msg">
           <!-- :style="i.userId == userId ? ' float: right;' : ''" -->
-          <span :class="i.userId == userId ? 'right' : 'left'">{{ i.content }}</span>
+          <span :class="i.from == userId ? 'right' : 'left'">{{ i.text }}</span>
         </div>
       </div>
     </div>
@@ -28,138 +21,57 @@
       <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" />
       <div class="btn" :class="{ ['btn-active']: contentText }" @click="sendText()">发送</div>
     </div>
-    <div class="table" v-if="isHistory">
-      <div class="demo-input-suffix searchInput">
-        <div class="block">
-          <el-date-picker v-model="date" type="date" placeholder="选择日期"> </el-date-picker>
-        </div>
-        <el-input placeholder="请输入用户名" prefix-icon="el-icon-search" v-model="searchText" maxlength="10" minlength="3" style="width: 20%"> </el-input>
-        <el-button type="primary" class="search" @click="search">搜索</el-button>
-      </div>
-      <el-table ref="singleTable" :data="curentHistory" style="width: 100%">
-        <el-table-column property="userId" label="用户名" width="120"> </el-table-column>
-        <el-table-column property="talk" label="内容" width="150"> </el-table-column>
-        <el-table-column property="date" label="日期" width="150"> </el-table-column>
-      </el-table>
-      <div class="block">
-        <el-pagination layout="prev, pager, next" :current-page="page" :total="history.length" background :page-sizes="[100, 200, 300, 400]" :page-size="pageSize" @current-change="pageChange"> </el-pagination>
-        <span v-if="isSearch" style="color: red">仅仅展示搜索到的{{ pageSize }}条信息 </span>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
+import { getUserHead } from '../getUserHead'
 export default {
   data() {
     return {
+      //这里的user不一定指的就是病人，也可能是医生，是当前用户的意思
       ws: null,
-      count: 0, //记录聊天人数
-      connectCount: 0, //记录在线人数
       userId: null, //当前用户ID
+      userName: '',
       list: [], //聊天记录的数组
       contentText: '', //input输入的值
-      isHistory: false, //是否打开历史记录
-      history: [], //存放所有的历史聊天记录
-      curentHistory: [], //当前页数的历史聊天记录
-      pageSize: 5, //每页的数据
-      date: '',
-      page: 0,
-      searchText: '',
-      isSearch: false
+      talk: [],
+      isDoctor: '',
+      currentImage: '',
+      currentName: '',
+      doctorMessage: [],
+      anotherUsers: '',
+      anotherUserName: ''
     }
   },
   created() {
     this.getUserID()
+    this.isDoctor = localStorage.getItem('isDoctor')
+    this.$axios.get('http://localhost:3000/api/Stu/showAllDoctor').then(response => {
+      if (response.status === 200) {
+        this.doctorMessage = response.data
+        this.doctorMessage.map(item => {
+          if (item.id === this.userId) {
+            this.currentImage = item.image
+            this.currentName = item.name
+          }
+        })
+      }
+    })
   },
   mounted() {
     this.initWebSocket()
-    this.scrollBottm()
   },
   methods: {
-    //搜索历史记录
-    search() {
-      this.isSearch = true
-      let temp = this.curentHistory
-      this.curentHistory = []
-      this.history.map(item => {
-        if (this.searchText && this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '' + this.date.getMonth() + 1}-${this.date.getDate() > 10 ? this.date.getDate() : '' + this.date.getDate()}` && item.userId === this.searchText) {
-            this.curentHistory.push(item)
-          }
-        } else if (this.searchText) {
-          if (item.userId === this.searchText) {
-            this.curentHistory.push(item)
-          }
-        } else if (this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '' + this.date.getMonth() + 1}-${this.date.getDate() > 10 ? this.date.getDate() : '' + this.date.getDate()}`) {
-            this.curentHistory.push(item)
-          }
-        } else {
-          this.curentHistory = temp
-        }
-      })
-      if (this.curentHistory.length > this.pageSize) {
-        this.curentHistory = this.curentHistory.slice(0, this.pageSize)
-      }
-    },
-    //页码改变触发，val是对应的页码
-    pageChange(val) {
-      this.date = ''
-      this.searchText = ''
-      this.isSearch = false
-      this.curentHistory = this.history.slice(this.pageSize * (val - 1), this.pageSize + this.pageSize * (val - 1))
-    },
-    //退出登录
-    quitLogin() {
-      this.$confirm('您确定要退出聊天室吗？', '确认信息', {
-        distinguishCancelAndClose: true,
-        confirmButtonText: '确定',
-        cancelButtonText: '点错了'
-      })
-        .then(() => {
-          this.$message({
-            type: 'info',
-            message: '您已退出聊天室'
-          })
-          // localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
-          // this.$router.push({ path: "/login" });
-          this.$router.push({ path: '/select/' + this.userId })
-        })
-        .catch(action => {
-          this.$message({
-            type: 'info',
-            message: action === 'cancel' ? '停留在该页面' : '您已取消'
-          })
-        })
-    },
     //根据url(用户名)作为当前用户ID
     getUserID() {
       // let time = new Date().getTime();
-      this.userId = window.location.hash.split('/').slice(-1)[0]
-    },
-    //查看历史聊天记录
-    seeHistory(boo) {
-      this.isHistory = boo
-    },
-    //根据userID生成一个随机头像
-    getUserHead(id, type) {
-      //如果id是数字就转字符串，如果是字母加数字或者字母，先转成数字再转字符串
-      let ID = String(isNaN(+id) ? id.charCodeAt() : id)
-      if (type === 'bck') {
-        return Number(ID.substring((Math.floor(ID.length / 3) - 3) * 3))
-      } else if (type === 'polygon') {
-        return Number(ID.substring((Math.floor(ID.length / 2) - 2) * 3))
-      } else if (type === 'rotate') {
-        return Number(ID.substring(ID.length - 3))
-      } else if (type === 'boderRadius') {
-        return [Number((+ID / (ID.length * ID)) * 100), (ID.substring(0, 3) / 999) * 100]
-      }
+      this.userId = localStorage.getItem('userId')
+      this.anotherUsers = location.hash.split('/').slice(-1)[0]
     },
     //滚动条到底部
     scrollBottm() {
       let el = this.$refs['msg-box']
-      console.log(el, 'el')
       el.scrollTop = el.scrollHeight
     },
     //发送聊天信息
@@ -170,11 +82,16 @@ export default {
         return
       }
       let params = {
-        userId: String(_this.userId),
-        msg: String(_this.contentText),
-        date: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()} ${
-          new Date().getHours() > 10 ? new Date().getHours() : '0' + new Date().getHours()
-        }:${new Date().getMinutes() > 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() > 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}` //将日期转成年-月-日  时：分：秒的形式
+        userId: patientId,
+        time: new Date(),
+        doctorId: doctorId,
+        doctorName: _this.isDoctor === 'true' ? _this.userName : _this.anotherUserName,
+        isDoctor: _this.isDoctor,
+        image: _this.currentImage,
+        to: _this.anotherUsers,
+        from: _this.userId,
+        userName: _this.userName,
+        text: this.contentText
       }
       _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法
       _this.contentText = ''
@@ -182,13 +99,16 @@ export default {
         _this.scrollBottm()
       }, 500)
     },
+    getUserHead(id, type) {
+      return getUserHead(id, type)
+    },
     //进入页面创建websocket连接
     initWebSocket() {
       let _this = this
       //判断页面有没有存在websocket连接
       if (window.WebSocket) {
-        //是我本地IP地址 此处的 :8181 端口号 要与后端配置的一致
-        let ws = new WebSocket(`ws://${location.hostname}:8181`)
+        //是我本地IP地址 此处的端口号 要与后端配置的一致
+        let ws = new WebSocket(`ws://${location.hostname}:8188`)
         _this.ws = ws
         // ws.onopen = function () {
         //   console.log("服务器连接成功");
@@ -196,35 +116,54 @@ export default {
         // ws.onclose = function () {
         //   console.log("服务器连接关闭");
         // };
+        //通信发生错误
         ws.onerror = function () {
           alert('您的网络连接不上')
         }
         ws.onmessage = function (e) {
           //接收服务器返回的数据
           let resData = JSON.parse(e.data)
-          _this.history = resData.history
-          _this.history = _this.history.sort((a, b) => a.id - b.id) //历史记录根据id排序
-          _this.curentHistory = _this.history.slice(0, _this.pageSize) //截取第一页的数据
           if (resData.funName == 'userCount') {
-            _this.connectCount = resData.users
             _this.list = resData.chat
-            //聊天人数根据list里面的userId统计，利用Set的特性不会把重复的数据放到set里面
-            let userNum = new Set()
-            _this.list.map(item => {
-              userNum.add(item.userId)
-            })
-            _this.count = userNum.size
           } else {
             _this.list = [
               ..._this.list,
               {
                 userId: resData.userId,
-                content: resData.msg,
-                date: resData.date
+                text: resData.text,
+                date: resData.date,
+                isDoctor: resData.isDoctor,
+                image: resData.image,
+                userName: resData.userName
               }
             ]
           }
-          _this.list = _this.list.sort((a, b) => a.date - b.date)
+          let doctorId
+          let patientId
+          if (_this.isDoctor === 'true') {
+            doctorId = _this.userId
+            patientId = location.hash.split('/').slice(-1)[0]
+          } else {
+            doctorId = localStorage.hash.split('/').slice(-1)[0]
+            patientId = _this.userId
+          }
+          console.log(doctorId)
+          //只筛选出当前用户和其另外一个人聊天的记录
+          _this.list = _this.list.filter(item => {
+            if (_this.isDoctor === 'true') {
+              _this.userId = item.doctorId
+              _this.userName = item.doctorName
+              _this.anotherUserName = item.userName
+              _this.anotherUsers = item.userId
+            } else {
+              _this.userId = item.userId
+              _this.userName = item.userName
+              _this.anotherUserName = item.doctorName
+              _this.anotherUsers = item.doctorId
+            }
+            return (item.to === doctorId && item.from === patientId) || (item.from === doctorId && item.to === patientId)
+          })
+          _this.list = _this.list.sort((a, b) => a.time - b.time)
         }
       }
     }

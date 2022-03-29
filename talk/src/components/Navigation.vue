@@ -1,6 +1,8 @@
 <template>
   <div style="z-index: 2">
-    <el-button type="primary" @click="GoBackSelect" class="reback">返回首页</el-button>
+    <el-button type="primary" @click="GoBackSelect(0)" class="reback" v-if="isDoctor !== 'true'">返回首页</el-button>
+    <el-button type="primary" @click="GoBackSelect(1)" class="reback" v-else>退出</el-button>
+
     <el-row class="tac">
       <el-col :span="12">
         <el-menu :default-active="curentMenu" :unique-opened="true" class="el-menu-vertical-demo" @select="changeSelect">
@@ -22,7 +24,7 @@
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
-          <el-submenu index="2">
+          <el-submenu index="2" v-if="isDoctor !== 'true'">
             <template slot="title">
               <i class="el-icon-document"></i>
               <span slot="title">预约挂号</span>
@@ -38,9 +40,17 @@
             <i class="el-icon-setting"></i>
             <span slot="title">线上问诊</span>
           </el-menu-item>
-          <el-menu-item index="4">
+          <el-menu-item index="4" v-if="isDoctor !== 'true'">
             <i class="el-icon-setting"></i>
             <span slot="title">门诊收银</span>
+          </el-menu-item>
+          <el-menu-item index="5">
+            <i class="el-icon-setting"></i>
+            <span slot="title">聊天室</span>
+          </el-menu-item>
+          <el-menu-item index="6" v-if="isDoctor === 'true'">
+            <i class="el-icon-setting"></i>
+            <span slot="title">预约记录</span>
           </el-menu-item>
         </el-menu>
       </el-col>
@@ -56,9 +66,13 @@ export default {
         { value: 'mengzhengpaiban', index: '2-1' },
         { value: '1/medicalKnowledge', index: '1-1' },
         { value: '2/medicalKnowledge', index: '1-2' },
-        { value: 'onlineconsultation', index: '3' }
+        { value: 'onlineconsultation', index: '3' },
+        { value: 'charge', index: '4' },
+        { value: '/talk' + localStorage.getItem('userId'), index: '5' },
+        { value: 'reservation', index: '6' }
       ],
-      curentMenu: '1-1'
+      curentMenu: '1-1',
+      isDoctor: localStorage.getItem('isDoctor')
     }
   },
   created() {
@@ -85,11 +99,35 @@ export default {
     // },
     changeSelect(index) {
       //点击菜单跳转到对应的子路由页面
-      let select = this.menuArr.filter(item => item?.index === index)[0]?.value
-      this.$router.push({ path: `/navigation/${select}` })
+      if (index !== '5') {
+        let select = this.menuArr.filter(item => item?.index === index)[0]?.value
+        this.$router.push({ path: `/navigation/${select}` })
+      } else {
+        this.$router.push({ path: '/talk/' + localStorage.getItem('userId') })
+      }
     },
-    GoBackSelect() {
-      this.$router.push({ path: '/select/' + localStorage.getItem('userId') })
+    GoBackSelect(num) {
+      if (num === 0) this.$router.push({ path: '/select/' + localStorage.getItem('userId') })
+      else {
+        this.$confirm('您确定要退出吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            localStorage.removeItem('userId')
+            localStorage.removeItem('doctorId')
+            localStorage.removeItem('authentication')
+            localStorage.removeItem('isDoctor')
+            this.$router.push({ path: '/login' })
+          })
+          .catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消'
+            })
+          })
+      }
     }
   }
 }

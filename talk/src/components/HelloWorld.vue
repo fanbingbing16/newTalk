@@ -1,7 +1,7 @@
 <template>
   <div class="chat-box">
     <div class="welcome">
-      <p>{{ userId }}欢迎您进入聊天室，您可以在这里畅所欲言</p>
+      <p>欢迎您进入聊天室，您可以在这里畅所欲言</p>
       <el-button type="primary" icon="el-icon-back" circle @click="quitLogin()"></el-button>
       <el-button type="primary" @click="seeHistory(true)" v-if="!isHistory">查看历史聊天记录</el-button>
       <el-button type="primary" @click="seeHistory(false)" v-if="isHistory">隐藏历史聊天记录</el-button>
@@ -15,8 +15,10 @@
             :style="` background: hsl(${getUserHead(i.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
               getUserHead(i.userId, 'boderRadius')[0]
             }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.userId, 'boderRadius')[1]}%;`"
+            v-if="i.isDoctor !== 'true'"
           ></div>
-          <span v-if="i.userId !== userId" :class="'leftSpan'">{{ i.userId }}</span>
+          <img :src="i.image" alt="" v-else style="max-width: 80%" />
+          <span v-if="i.userId !== userId" :class="'leftSpan'">{{ i.isDoctor === 'true' ? i.userName : i.userId }}</span>
         </div>
         <div class="user-msg">
           <!-- :style="i.userId == userId ? ' float: right;' : ''" -->
@@ -50,6 +52,7 @@
 </template>
 
 <script>
+import { getUserHead } from './getUserHead'
 export default {
   data() {
     return {
@@ -66,11 +69,26 @@ export default {
       date: '',
       page: 0,
       searchText: '',
-      isSearch: false
+      isSearch: false,
+      isDoctor: localStorage.getItem('isDoctor'),
+      doctorMessage: [],
+      currentImage: '',
+      currentName: ''
     }
   },
   created() {
     this.getUserID()
+    this.$axios.get('http://localhost:3000/api/Stu/showAllDoctor').then(response => {
+      if (response.status === 200) {
+        this.doctorMessage = response.data
+        this.doctorMessage.map(item => {
+          if (item.id === this.userId) {
+            this.currentImage = item.image
+            this.currentName = item.name
+          }
+        })
+      }
+    })
   },
   mounted() {
     this.initWebSocket()
@@ -84,7 +102,7 @@ export default {
       this.curentHistory = []
       this.history.map(item => {
         if (this.searchText && this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '' + this.date.getMonth() + 1}-${this.date.getDate() > 10 ? this.date.getDate() : '' + this.date.getDate()}` && item.userId === this.searchText) {
+          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() > 10 ? this.date.getDate() : '0' + this.date.getDate()}` && item.userId === this.searchText) {
             this.curentHistory.push(item)
           }
         } else if (this.searchText) {
@@ -92,7 +110,7 @@ export default {
             this.curentHistory.push(item)
           }
         } else if (this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '' + this.date.getMonth() + 1}-${this.date.getDate() > 10 ? this.date.getDate() : '' + this.date.getDate()}`) {
+          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() > 10 ? this.date.getDate() : '0' + this.date.getDate()}`) {
             this.curentHistory.push(item)
           }
         } else {
@@ -124,7 +142,7 @@ export default {
           })
           // localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
           // this.$router.push({ path: "/login" });
-          this.$router.push({ path: '/select/' + this.userId })
+          this.$router.push({ path: '/navigation/2/medicalKnowledge' })
         })
         .catch(action => {
           this.$message({
@@ -144,22 +162,12 @@ export default {
     },
     //根据userID生成一个随机头像
     getUserHead(id, type) {
-      //如果id是数字就转字符串，如果是字母加数字或者字母，先转成数字再转字符串
-      let ID = String(isNaN(+id) ? id.charCodeAt() : id)
-      if (type === 'bck') {
-        return Number(ID.substring((Math.floor(ID.length / 3) - 3) * 3))
-      } else if (type === 'polygon') {
-        return Number(ID.substring((Math.floor(ID.length / 2) - 2) * 3))
-      } else if (type === 'rotate') {
-        return Number(ID.substring(ID.length - 3))
-      } else if (type === 'boderRadius') {
-        return [Number((+ID / (ID.length * ID)) * 100), (ID.substring(0, 3) / 999) * 100]
-      }
+      //将获取用户头像的方法移到外部的js文件，这样的话多个组件之间就可以互相使用
+      return getUserHead(id, type)
     },
     //滚动条到底部
     scrollBottm() {
       let el = this.$refs['msg-box']
-      console.log(el,'el')
       el.scrollTop = el.scrollHeight
     },
     //发送聊天信息
@@ -175,7 +183,10 @@ export default {
         msg: String(_this.contentText),
         date: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()} ${
           new Date().getHours() > 10 ? new Date().getHours() : '0' + new Date().getHours()
-        }:${new Date().getMinutes() > 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() > 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}` //将日期转成年-月-日  时：分：秒的形式
+        }:${new Date().getMinutes() > 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() > 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}`, //将日期转成年-月-日  时：分：秒的形式
+        isDoctor: this.isDoctor,
+        image: this.currentImage,
+        userName: this.currentName
       }
       _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法，向服务端发送数据
       _this.contentText = ''
@@ -205,7 +216,7 @@ export default {
           //接收服务器返回的数据
           let resData = JSON.parse(e.data)
           _this.history = resData.history
-          _this.history = _this.history.sort((a, b) => a.id - b.id) //历史记录根据id排序
+          // _this.history = _this.history.sort((a, b) => a.id - b.id) //历史记录根据id排序
           _this.curentHistory = _this.history.slice(0, _this.pageSize) //截取第一页的数据
           if (resData.funName == 'userCount') {
             _this.connectCount = resData.users
@@ -222,7 +233,10 @@ export default {
               {
                 userId: resData.userId,
                 content: resData.msg,
-                date: resData.date
+                date: resData.date,
+                isDoctor: resData.isDoctor,
+                image: resData.image,
+                userName: resData.userName
               }
             ]
           }
@@ -265,7 +279,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-
+  overflow: hidden;
   /* // position: absolute; */
 }
 .head {
@@ -295,7 +309,7 @@ export default {
   position: absolute;
 }
 .leftSpan {
-  width: 1%;
+  width: 6%;
   font-size: 10px;
   /* margin-left: 20px; */
   position: absolute;

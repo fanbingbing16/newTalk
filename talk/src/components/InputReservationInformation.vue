@@ -13,6 +13,9 @@
         <el-form-item label="就诊卡" prop="medicalCard" v-else class="medicalCard">
           <el-input v-model="ruleForm.medicalCard"></el-input>
         </el-form-item>
+        <el-form-item label="是女生吗?" prop="sex">
+          <el-switch v-model="ruleForm.sex"></el-switch>
+        </el-form-item>
         <el-form-item label="过敏史" prop="allergicHistory">
           <el-input v-model="ruleForm.allergicHistory"></el-input>
         </el-form-item>
@@ -47,7 +50,8 @@ export default {
         medicalCard: '',
         isMedicalInsuranceCard: false,
         detail: '',
-        fever: false
+        fever: false,
+        sex: false
       },
       rules: {
         allergicHistory: { required: true, message: '请输入过敏史', trigger: 'blur' },
@@ -132,7 +136,8 @@ export default {
             time,
             doctorId: this.doctorMessage.id,
             doctorName: this.doctorMessage.name,
-            part: this.doctorMessage.part
+            part: this.doctorMessage.part,
+            sex: this.ruleForm.sex ? '女' : '男'
           }
         } else {
           params = {
@@ -143,7 +148,8 @@ export default {
             time,
             doctorId: this.doctorMessage.id,
             doctorName: this.doctorMessage.name,
-            part: this.doctorMessage.part
+            part: this.doctorMessage.part,
+            sex: this.ruleForm.sex ? '女' : '男'
           }
         }
 
