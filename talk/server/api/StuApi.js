@@ -51,7 +51,7 @@ router.get('/showStu', (req, res) => {
   const sql = $sql.Stu.show
   const params = req.body
   console.log(params)
-  conn.query(sql, [params.userId, params.userName, params.password, params.text], function (err, result) {
+  conn.query(sql, [], function (err, result) {
     if (err) {
       console.log(err)
     }
@@ -320,12 +320,26 @@ router.post('/searchTalkOfTime', (req, res) => {
     }  // 
   })
 })
+// 接口：查询指定病人的未结束的聊天记录
+router.post('/searchPatientTalk', (req, res) => {
+  const sql = $sql.Stu.searchPatientTalk
+  const params = req.body
+  console.log('查询指定病人的未结束的聊天记录', params)
+  conn.query(sql, [params.userId], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
 // 接口：根据发送人查询聊天记录
 router.post('/searchTalkOfFrom', (req, res) => {
   const sql = $sql.Stu.searchTalkOfFrom
   const params = req.body
   console.log('searchTalkOfFrom 查询聊天记录', params)
-  conn.query(sql, [params.from], function (err, result) {
+  conn.query(sql, [params.talkFrom], function (err, result) {
     if (err) {
       throw new Error(err)
     }
@@ -339,7 +353,7 @@ router.post('/searchTalkOfTo', (req, res) => {
   const sql = $sql.Stu.searchTalkOfFrom
   const params = req.body
   console.log('searchTalkOfTo 查询聊天记录', params)
-  conn.query(sql, [params.to], function (err, result) {
+  conn.query(sql, [params.talkTo], function (err, result) {
     if (err) {
       throw new Error(err)
     }
@@ -353,27 +367,11 @@ router.post('/searchTalkOfFromTo', (req, res) => {
   const sql = $sql.Stu.searchTalkOfFromTo
   const params = req.body
   console.log('searchTalkOfFromTo 查询聊天记录', params)
-  conn.query(sql, [params.from, params.to], function (err, result) {
+  conn.query(sql, [params.talkFrom, params.talkTo], function (err, result) {
     if (err) {
       throw new Error(err)
     }
     if (result) {
-      jsonWrite(res, result)
-    }  // 
-  })
-})
-//接口，增加聊天记录
-router.post('/addTalk', (req, res) => {
-  const sql = $sql.Stu.addTalk
-  const params = req.body
-  const id = createId()
-  console.log('增加聊天记录', params)
-  conn.query(sql, [params.doctorId, params.doctorName, params.userId, params.userName, params.time, params.text, id, params.endTime, params.to, params.from], function (err, result) {
-    if (err) {
-      console.log(err)
-    }
-    if (result) {
-      console.log(result)
       jsonWrite(res, result)
     }  // 
   })
@@ -456,6 +454,69 @@ router.post('/addDoctorUser', (req, res) => {
           jsonWrite(res, result)
         }
       })
+    }  // 
+  })
+})
+// 接口：病人主动结束问诊，删除问诊的聊天信息，将其存储到history中 涉及三句sql
+// searchPatientTalk endTalk addHistoryTalk
+// history_online_consultion(userId,userName,doctorId,id,endTime,startTime,info) values (?,?,?,?,?,?,?)',
+// 
+router.post('/endTalk', (req, res) => {
+  const sql1 = $sql.Stu.searchPatientTalk
+  const sql2 = $sql.Stu.endTalk
+  const sql3 = $sql.Stu.addHistoryTalk
+  const params = req.body
+  const id = createId()
+  console.log('结束问诊，删除问诊的聊天信息，将其存储到history中', params)
+  conn.query(sql1, [params.userId], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      let talk = JSON.parse(JSON.stringify(result))
+      let history = []
+      talk.map(item => {
+        let index = history.findIndex(element =>
+          element.doctorId === item.doctorId && element.userId === item.userId
+        )
+        if (index > -1) {
+          console.log(history[index])
+          history[index].info.push({ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time })
+          history[index].startTime = Math.min(history[index].startTime, item.time)
+        } else {
+          history.push({
+            userId: item.userId, userName: item.userName, doctorId: item.doctorId, doctorName: item.doctorName, id, endTime: new Date().getTime(), startTime: item.time,
+            info: [{ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time }], endOf: 'patient'
+          })
+        }
+      })
+      // userId,userName,doctorId,doctorName,id,endTime,startTime,info
+      history.map(item => {
+        item.info = JSON.stringify(item.info)
+        item.id = createId()
+        conn.query(sql3, Object.values(item), function (err2, result2) {
+          if (err2) {
+            console.log(err2)
+          }
+        })
+      })
+      conn.query(sql2, [params.userId], function (err3) {
+        console.log(err3)
+      })
+    }  // 
+  })
+})
+// 接口：查询历史线上问诊记录，根据医生查询
+router.post('/searchHistoryTalk', (req, res) => {
+  const sql = $sql.Stu.searchHistoryTalk
+  const params = req.body
+  console.log('searchHistoryTalk 查询历史线上问诊记录，根据医生查询', params)
+  conn.query(sql, [params.doctorId], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
     }  // 
   })
 })

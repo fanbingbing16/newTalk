@@ -28,29 +28,26 @@ app.listen(3000)
 console.log('success listen at port:3000......')
 
 
-
-var userNum = 0; //统计在线人数
 var chatList = [];//记录聊天记录
-let history = []//记录历史聊天记录
 var WebSocketServer = require('ws').Server;
-wss = new WebSocketServer({ port: 8180 }); //8180 与前端相对应
+wss = new WebSocketServer({ port: 8188 }); //8181 与前端相对应
 const mysql = require('mysql')
-let data = []
 var connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "111",
-    database: "mysql",
+    database: "hospital",
     timezone: "08:00"
 })//连接数据库
 connection.connect()
-connection.query('select * from talkDoctor', [], function (err, result) {
+connection.query('select talkDoctor.*,doctor.* from talkDoctor,doctor where talkDoctor.doctorId = doctor.id', [], function (err, result) {
     if (err) {
         console.log(err, 'err')
     }
     if (result) {
         let a = JSON.parse(JSON.stringify(result))
-        chatList.push(a)
+        chatList = a
+        console.log(a, 'a')
     }
 })
 //调用 broadcast 广播，实现数据互通和实时更新
@@ -60,13 +57,13 @@ wss.broadcast = function (msg) {
     });
 };
 wss.on('connection', function (ws) {
-    wss.broadcast(JSON.stringify(chatList)); //建立连接成功广播一次当前在线人数
-    console.log('Connected clients:', ws);
+    wss.broadcast(JSON.stringify({ funName: 'userCount', chat: chatList })); //建立连接成功广播一次当前在线人数
+    console.log('Connected clients:',);
     //接收前端发送过来的数据
     ws.on('message', function (e) {
         var resData = JSON.parse(e)
-        console.log('接收到来自', resData)
-        chatList.push(resData);//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
+        console.log('接收到来自' + resData.talkFrom + '的消息：' + resData.text, resData)
+        chatList.push({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
         //利用随机数和时间戳生成随机数
         function createId() {
             let word = 'abcdefghijklmnopqrstuvwxyz'
@@ -83,10 +80,17 @@ wss.on('connection', function (ws) {
         }
         let id = createId()
         console.log(id, 'id')
-        wss.broadcast(JSON.stringify(chatList)); //每次发送都相当于广播一次消息
+        wss.broadcast(JSON.stringify({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime })); //每次发送都相当于广播一次消息
+        const sql = 'insert into talkDoctor(doctorId,doctorName,userId,userName,time,id,text,endTime,talkTo,talkFrom) values (?,?,?,?,?,?,?,?,?,?)'
+        console.log('添加', resData)
+        connection.query(sql, [resData.doctorId, resData.doctorName, resData.userId, resData.userName, resData.time, id, resData.text, resData.endTime, resData.talkTo, resData.talkFrom], function (err, result) {
+            if (err) {
+                console.log(err)
+            }
+        })
     });
     ws.on('close', function (e) {
-        wss.broadcast(JSON.stringify({ funName: '关闭'}));//建立连接关闭广播一次当前在线人数
+        wss.broadcast(JSON.stringify({ funName: 'userCount', users: '', chat: chatList }));//建立连接关闭广播一次当前在线人数
         console.log('Connected clients:', e);
         console.log('长连接已关闭')
     })

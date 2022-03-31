@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "111",
-    database: "mysql",
+    database: "hospital",
     timezone: "08:00"
 })//连接数据库
 connection.connect()
