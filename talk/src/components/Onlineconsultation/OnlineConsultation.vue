@@ -1,6 +1,13 @@
 <template>
   <div class="online">
-    <div class="user" v-if="isDoctor !== 'true'">
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="endOnline">
+      <span>您还有一段尚未结束的线上问诊记录，是否继续？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="endOnline">新的问诊</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+    <div class="user" v-if="isDoctor !== 'true' && onlineRecord.length === 0">
       <div class="background-grey"></div>
       <Sfz v-if="showValidRz" @authentication="authentication" @cancle="cancle"></Sfz>
       <InputBaseMessage v-if="!showValidRz && showBaseMessage" @confirm="conform"></InputBaseMessage>
@@ -18,7 +25,7 @@
         </div>
       </div>
     </div>
-    <talk-user v-else></talk-user>
+    <talk-user v-else-if="isDoctor === 'true'"></talk-user>
   </div>
 </template>
 <script>
@@ -34,6 +41,7 @@ export default {
   inject: ['reload'],
   created() {
     let authentication = localStorage.getItem('authentication')
+    this.userId = localStorage.getItem('userId')
     //验证是否认证身份证
     if (authentication) {
       this.showValidRz = true
@@ -45,16 +53,30 @@ export default {
         this.doctorMessage = response.data
       }
     })
+    this.$axios.post('http://localhost:3000/api/Stu/searchPatientTalk', { userId: this.userId }).then(response => {
+      if (response.status === 200) {
+        this.onlineRecord = response.data
+        if (response.data.length > 0) {
+          this.dialogVisible = true
+        }
+      }
+    })
   },
   data() {
     return {
       showValidRz: false,
       showBaseMessage: false,
       doctorMessage: [],
-      isDoctor: localStorage.getItem('isDoctor')
+      isDoctor: localStorage.getItem('isDoctor'),
+      onlineRecord: [],
+      userId: '',
+      dialogVisible: false
     }
   },
   methods: {
+    endOnline() {
+      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId })
+    },
     authentication(authentication) {
       this.showValidRz = false
       localStorage.removeItem('authentication')
@@ -116,5 +138,10 @@ img {
 }
 .card:hover {
   background: rgb(230 230 230);
+}
+</style>
+<style>
+.v-modal {
+  opacity: 0;
 }
 </style>

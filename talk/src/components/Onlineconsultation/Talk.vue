@@ -1,19 +1,21 @@
 <template>
   <div class="chat-box">
     <div class="msg-box" ref="msg-box">
-      <div v-for="(i, index) in list" :key="index" class="msg" :style="i.from == userId ? 'flex-direction:row-reverse' : ''">
+      <div v-for="(i, index) in list" :key="index" class="msg" :style="i.talkFrom == userId ? 'flex-direction:row-reverse' : ''">
         <div class="user-head">
           <div
             class="head"
-            :style="` background: hsl(${getUserHead(i.from, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
-              getUserHead(i.from, 'boderRadius')[0]
-            }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.from, 'boderRadius')[1]}%;`"
+            :style="` background: hsl(${getUserHead(i.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
+              getUserHead(i.userId, 'boderRadius')[0]
+            }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.userId, 'boderRadius')[1]}%;`"
+            v-if="i.talkFrom !== i.doctorId"
           ></div>
-          <span v-if="i.from !== userId" :class="'leftSpan'">{{ i.from }}</span>
+          <img :src="i.image" alt="" v-else style="max-width: 80%" />
+          <span v-if="i.talkFrom !== userId" :class="'leftSpan'">{{ i.talkFrom === i.doctorId ? i.doctorName : i.userName }}</span>
         </div>
         <div class="user-msg">
           <!-- :style="i.userId == userId ? ' float: right;' : ''" -->
-          <span :class="i.from == userId ? 'right' : 'left'">{{ i.text }}</span>
+          <span :class="i.talkFrom == userId ? 'right' : 'left'">{{ i.text }}</span>
         </div>
       </div>
     </div>
@@ -37,11 +39,13 @@ export default {
       contentText: '', //input输入的值
       talk: [],
       isDoctor: '',
-      currentImage: '',
-      currentName: '',
+      doctorImage: '',
+      doctorName: '',
+      patientName: '',
       doctorMessage: [],
       anotherUsers: '',
-      anotherUserName: ''
+      anotherUserName: '',
+      endTime: 0
     }
   },
   created() {
@@ -51,11 +55,18 @@ export default {
       if (response.status === 200) {
         this.doctorMessage = response.data
         this.doctorMessage.map(item => {
-          if (item.id === this.userId) {
-            this.currentImage = item.image
-            this.currentName = item.name
+          if ((this.isDoctor === 'true' && item.id === this.userId) || (this.isDoctor !== 'true' && item.id === this.anotherUsers)) {
+            this.doctorImage = item.image
+            this.doctorName = item.name
           }
         })
+      }
+    })
+    let patientId = ''
+    patientId = this.isDoctor === 'true' ? this.anotherUsers : this.userId
+    this.$axios.post('http://localhost:3000/api/Stu/showOfId', { userId: patientId }).then(response => {
+      if (response.status === 200) {
+        this.patientName = response.data[0].userName
       }
     })
   },
@@ -82,16 +93,17 @@ export default {
         return
       }
       let params = {
-        userId: patientId,
-        time: new Date(),
-        doctorId: doctorId,
-        doctorName: _this.isDoctor === 'true' ? _this.userName : _this.anotherUserName,
+        userId: _this.isDoctor === 'true' ? _this.anotherUsers : _this.userId,
+        time: new Date().getTime(),
+        doctorId: _this.isDoctor === 'true' ? _this.userId : _this.anotherUsers,
+        doctorName: _this.doctorName,
         isDoctor: _this.isDoctor,
-        image: _this.currentImage,
-        to: _this.anotherUsers,
-        from: _this.userId,
-        userName: _this.userName,
-        text: this.contentText
+        image: _this.doctorImage,
+        talkTo: _this.anotherUsers,
+        talkFrom: _this.userId,
+        userName: _this.patientName,
+        text: this.contentText,
+        endTime: this.endTime
       }
       _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法
       _this.contentText = ''
@@ -130,11 +142,16 @@ export default {
               ..._this.list,
               {
                 userId: resData.userId,
-                text: resData.text,
-                date: resData.date,
+                time: resData.time,
+                doctorId: resData.doctorId,
+                doctorName: resData.doctorName,
                 isDoctor: resData.isDoctor,
                 image: resData.image,
-                userName: resData.userName
+                talkTo: resData.talkTo,
+                talkFrom: resData.talkFrom,
+                userName: resData.userName,
+                text: resData.text,
+                endTime: resData.endTime
               }
             ]
           }
@@ -144,24 +161,12 @@ export default {
             doctorId = _this.userId
             patientId = location.hash.split('/').slice(-1)[0]
           } else {
-            doctorId = localStorage.hash.split('/').slice(-1)[0]
+            doctorId = location.hash.split('/').slice(-1)[0]
             patientId = _this.userId
           }
-          console.log(doctorId)
           //只筛选出当前用户和其另外一个人聊天的记录
           _this.list = _this.list.filter(item => {
-            if (_this.isDoctor === 'true') {
-              _this.userId = item.doctorId
-              _this.userName = item.doctorName
-              _this.anotherUserName = item.userName
-              _this.anotherUsers = item.userId
-            } else {
-              _this.userId = item.userId
-              _this.userName = item.userName
-              _this.anotherUserName = item.doctorName
-              _this.anotherUsers = item.doctorId
-            }
-            return (item.to === doctorId && item.from === patientId) || (item.from === doctorId && item.to === patientId)
+            return (item.talkTo === doctorId && item.talkFrom === patientId) || (item.talkFrom === doctorId && item.talkTo === patientId)
           })
           _this.list = _this.list.sort((a, b) => a.time - b.time)
         }
@@ -232,7 +237,7 @@ export default {
   position: absolute;
 }
 .leftSpan {
-  width: 1%;
+  width: 6%;
   font-size: 10px;
   /* margin-left: 20px; */
   position: absolute;

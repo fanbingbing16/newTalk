@@ -72,7 +72,6 @@ export default {
     const userId = localStorage.getItem('userId')
     this.$axios.post('http://localhost:3000/api/Stu/showOfId', { userId }).then(response => {
       if (response.status === 200) {
-        console.log(response)
         this.edit.id_number = response.data[0].sfz_number
         this.edit.id_number = String(this.edit.id_number)
           .split('')

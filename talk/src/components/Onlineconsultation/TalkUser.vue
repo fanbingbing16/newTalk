@@ -1,5 +1,6 @@
 <template>
   <div class="talk-user">
+    <p v-if="talk.length > 0">线上问诊</p>
     <div class="card" v-for="(item, index) in talk" :key="index" @click="gotoTalk(item)">
       <div class="user-head">
         <div
@@ -11,8 +12,10 @@
         <span v-if="item.userId !== userId" :class="'leftSpan'">{{ item.userName }}</span>
       </div>
       <p>{{ item.lastTime | fromDate }}</p>
-      <p style="top: 10px; font-size: 26px; color: #d0d0d0">{{ item.lastText }}</p>
+      <p style="top: 10px; font-size: 26px; color: #d0d0d0">{{ item.userName }}:{{ item.lastText }}</p>
     </div>
+    <p v-if="historyTalk.length > 0">病人主动结束的线上问诊</p>
+    <div class="card" v-for="item in historyTalk" :key="item.id"></div>
   </div>
 </template>
 <script>
@@ -26,8 +29,15 @@ export default {
     return {
       list: [],
       talk: [],
-      userId: localStorage.getItem('userId')
+      userId: '',
+      historyTalk: []
     }
+  },
+  created() {
+    this.userId = localStorage.getItem('userId')
+    this.$axios.post('http://localhost:3000/api/Stu/searchHistoryTalk', { doctorId: this.userId }).then(response => {
+      if (response.status === 200) this.historyTalk = response.data
+    })
   },
   filters: {
     fromDate(date) {
@@ -69,30 +79,35 @@ export default {
               ..._this.list,
               {
                 userId: resData.userId,
-                content: resData.msg,
-                date: resData.date,
+                time: resData.time,
+                doctorId: resData.doctorId,
+                doctorName: resData.doctorName,
                 isDoctor: resData.isDoctor,
                 image: resData.image,
-                userName: resData.userName
+                talkTo: resData.talkTo,
+                talkFrom: resData.talkFrom,
+                userName: resData.userName,
+                text: resData.text,
+                endTime: resData.endTime
               }
             ]
           }
           //只筛选出当前用户参与过的聊天 from表示发送消息的人，to表示接受消息的人
           _this.list = _this.list.filter(item => {
-            return item.to === _this.userId || item.from === _this.userId
+            return item.talkTo === _this.userId || item.talkFrom === _this.userId
           })
           _this.list.map(item => {
             let index = _this.talk.findIndex(element => {
-              return (element.userId === item.to && item.from === element.doctorId) || (element.doctorId === item.to && item.from === element.userId)
+              return (element.userId === item.talkTo && item.talkFrom === element.doctorId) || (element.doctorId === item.talkTo && item.talkFrom === element.userId)
             })
             if (index > -1) {
               _this.talk[index].info.push(item.text)
-              _this.talk[index].to.push(item.to)
-              _this.talk[index].from.push(item.from)
+              _this.talk[index].talkTo.push(item.talkTo)
+              _this.talk[index].talkFrom.push(item.talkFrom)
               _this.talk[index].time.push(item.time)
               _this.talk[index].endTime = item.endTime ? item.endTime : null
             } else {
-              _this.talk.push({ to: [item.to], from: [item.from], info: [item.text], time: [item.time], endTime: item.endTime ? item.endTime : null, userId: item.userId, doctorId: item.doctorId, userName: item.userName, doctorName: item.userName })
+              _this.talk.push({ talkTo: [item.talkTo], talkFrom: [item.talkFrom], info: [item.text], time: [item.time], endTime: item.endTime ? item.endTime : null, userId: item.userId, doctorId: item.doctorId, userName: item.userName, doctorName: item.userName })
             }
           })
           _this.talk.map(item => {
