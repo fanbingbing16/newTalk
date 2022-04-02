@@ -206,6 +206,24 @@ router.get('/searchKnowledge', (req, res) => {
     }  // 
   })
 })
+//接口，增加医学知识
+router.post('/addKnowledge', (req, res) => {
+  const sql = $sql.Stu.addKnowledge
+  const params = req.body
+  const id = createId()
+  const classification = params.classification && params.classification.length > 0 ? params.classification : '1'
+  console.log('医学常识', params)
+  conn.query(sql, [params.title, params.content, classification, id], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
 //接口，根据医生的id查询预约记录
 router.post('/searchOrderOfDoctor', (req, res) => {
   const sql = $sql.Stu.searchOrderOfDoctor
@@ -486,7 +504,7 @@ router.post('/endTalk', (req, res) => {
         } else {
           history.push({
             userId: item.userId, userName: item.userName, doctorId: item.doctorId, doctorName: item.doctorName, id, endTime: new Date().getTime(), startTime: item.time,
-            info: [{ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time }], endOf: 'patient'
+            info: [{ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time }], endOf: params.endOf, isPrescription: params.isPrescription,
           })
         }
       })
