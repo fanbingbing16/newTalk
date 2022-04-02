@@ -1,21 +1,22 @@
 <template>
   <div class="talk-user">
-    <p v-if="talk.length > 0">线上问诊</p>
-    <div class="card" v-for="(item, index) in talk" :key="index" @click="gotoTalk(item)">
-      <div class="user-head">
-        <div
-          class="head"
-          :style="` background: hsl(${getUserHead(item.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(item.userId, 'rotate')}deg);border-radius: ${getUserHead(item.userId, 'boderRadius')[0]}% ${
-            getUserHead(item.userId, 'boderRadius')[0]
-          }% ${getUserHead(item.userId, 'boderRadius')[1]}% ${getUserHead(item.userId, 'boderRadius')[1]}%;`"
-        ></div>
-        <span v-if="item.userId !== userId" :class="'leftSpan'">{{ item.userName }}</span>
+    <div class="online">
+      <p v-if="talk.length > 0">线上问诊</p>
+      <p v-else>赞无未结束的线上问诊记录</p>
+      <div class="card" v-for="(item, index) in talk" :key="index" @click="gotoTalk(item)">
+        <div class="user-head">
+          <div
+            class="head"
+            :style="` background: hsl(${getUserHead(item.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(item.userId, 'rotate')}deg);border-radius: ${getUserHead(item.userId, 'boderRadius')[0]}% ${
+              getUserHead(item.userId, 'boderRadius')[0]
+            }% ${getUserHead(item.userId, 'boderRadius')[1]}% ${getUserHead(item.userId, 'boderRadius')[1]}%;`"
+          ></div>
+          <span v-if="item.userId !== userId" :class="'leftSpan'">{{ item.userName }}</span>
+        </div>
+        <p>{{ item.lastTime | fromDate }}</p>
+        <p style="top: 10px; font-size: 26px; color: #d0d0d0">{{ item.lastText }}</p>
       </div>
-      <p>{{ item.lastTime | fromDate }}</p>
-      <p style="top: 10px; font-size: 26px; color: #d0d0d0">{{ item.userName }}:{{ item.lastText }}</p>
     </div>
-    <p v-if="historyTalk.length > 0">病人主动结束的线上问诊</p>
-    <div class="card" v-for="item in historyTalk" :key="item.id"></div>
   </div>
 </template>
 <script>
@@ -35,9 +36,6 @@ export default {
   },
   created() {
     this.userId = localStorage.getItem('userId')
-    this.$axios.post('http://localhost:3000/api/Stu/searchHistoryTalk', { doctorId: this.userId }).then(response => {
-      if (response.status === 200) this.historyTalk = response.data
-    })
   },
   filters: {
     fromDate(date) {
@@ -94,11 +92,11 @@ export default {
           }
           //只筛选出当前用户参与过的聊天 from表示发送消息的人，to表示接受消息的人
           _this.list = _this.list.filter(item => {
-            return item.talkTo === _this.userId || item.talkFrom === _this.userId
+            return item.doctorId === _this.userId
           })
           _this.list.map(item => {
             let index = _this.talk.findIndex(element => {
-              return (element.userId === item.talkTo && item.talkFrom === element.doctorId) || (element.doctorId === item.talkTo && item.talkFrom === element.userId)
+              return (element.userName === item.talkTo && item.talkFrom === element.doctorName) || (element.doctorName === item.talkTo && item.talkFrom === element.userName)
             })
             if (index > -1) {
               _this.talk[index].info.push(item.text)
@@ -107,7 +105,7 @@ export default {
               _this.talk[index].time.push(item.time)
               _this.talk[index].endTime = item.endTime ? item.endTime : null
             } else {
-              _this.talk.push({ talkTo: [item.talkTo], talkFrom: [item.talkFrom], info: [item.text], time: [item.time], endTime: item.endTime ? item.endTime : null, userId: item.userId, doctorId: item.doctorId, userName: item.userName, doctorName: item.userName })
+              _this.talk.push({ talkTo: [item.talkTo], talkFrom: [item.talkFrom], info: [item.text], time: [item.time], endTime: item.endTime ? item.endTime : null, userId: item.userId, doctorId: item.doctorId, userName: item.userName, doctorName: item.doctorName })
             }
           })
           _this.talk.map(item => {

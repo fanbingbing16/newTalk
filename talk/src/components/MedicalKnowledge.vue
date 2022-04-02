@@ -1,22 +1,44 @@
 <template>
   <div class="knoledge" :style="seartResult.length > 0 ? 'overflow-y: scroll;' : ''">
-    <el-autocomplete popper-class="my-autocomplete" @keyup.enter.native="searchArticle" v-model="searchText" :fetch-suggestions="querySearch" placeholder="请输入内容进行搜索" @select="handleSelect">
-      <template slot-scope="{ item }">
-        <div class="name">{{ item.value }}</div>
-      </template>
-    </el-autocomplete>
+    <div>
+      <el-autocomplete popper-class="my-autocomplete" @keyup.enter.native="searchArticle" v-model="searchText" :fetch-suggestions="querySearch" placeholder="请输入内容进行搜索" @select="handleSelect">
+        <template slot-scope="{ item }">
+          <div class="name">{{ item.value }}</div>
+        </template>
+      </el-autocomplete>
+      <el-button style="position: absolute; top: 10px" @click="showAddMessage = true">增加数据</el-button>
+    </div>
     <template v-if="seartResult.length > 0">
       <div class="article" v-for="item in seartResult" :key="item.id">
         <p v-if="item.classification !== '1'" class="bigTitle">{{ item.classification }}</p>
         <p class="title">{{ item.title }}</p>
         <p class="content">{{ item.content }}</p>
       </div>
+      <div class="background-grey" v-if="showAddMessage"></div>
+      <el-dialog title="增加数据" :visible.sync="showAddMessage" width="30%">
+        <el-form ref="Form" :rules="rules" status-icon :model="add" label-width="100px">
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="add.title"></el-input>
+          </el-form-item>
+          <el-form-item label="内容" prop="content">
+            <el-input v-model="add.content"></el-input>
+          </el-form-item>
+          <el-form-item label="类别" prop="classification">
+            <el-input v-model="add.classification"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="cangcle">取 消</el-button>
+          <el-button type="primary" @click="addMessage">确 定</el-button>
+        </span>
+      </el-dialog>
     </template>
     <div v-else class="noMessage">暂无数据,请尝试搜索其他关键词</div>
   </div>
 </template>
 <script>
 export default {
+  inject: ['reload'],
   data() {
     return {
       //fullData存储数据库返回的所有信息，knowedge根据路由存储生活常识或者医学常识，seartResult存储搜素结果
@@ -24,8 +46,19 @@ export default {
       restaurants: [],
       searchText: '',
       seartResult: [],
+      add: {
+        classification: '',
+        title: '',
+        content: ''
+      },
+      rules: {
+        title: [{ required: true, message: '标题必填', trigger: 'blur' }],
+        content: [{ required: true, message: '内容必填', trigger: 'blur' }]
+      },
       fullData: [],
-      path: location.hash.split('/')
+      showAddMessage: false,
+      path: location.hash.split('/'),
+      isDoctor: localStorage.getItem('isDoctor')
     }
   },
   created() {
@@ -35,6 +68,22 @@ export default {
     })
   },
   methods: {
+    cangcle() {
+      this.showAddMessage = false
+      this.$refs['Form'].resetFields()
+    },
+    addMessage() {
+      this.$refs['Form'].validate(valid => {
+        if (valid) {
+          this.$axios.post('http://localhost:3000/api/Stu/addKnowledge', this.add).then(response => {
+            if (response.status === 200) {
+              this.cangcle()
+              this.reload()
+            }
+          })
+        }
+      })
+    },
     querySearch(queryString, cb) {
       var restaurants = this.restaurants
       var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants

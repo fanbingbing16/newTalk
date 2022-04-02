@@ -1,21 +1,22 @@
 <template>
   <div class="chat-box">
+    <el-button style="position: absolute; top: 10px; left: 800px" @click="$router.push({ path: '/navigation/1/medicalknowledge' })">返回</el-button>
     <div class="msg-box" ref="msg-box">
-      <div v-for="(i, index) in list" :key="index" class="msg" :style="i.talkFrom == userId ? 'flex-direction:row-reverse' : ''">
+      <div v-for="(i, index) in list" :key="index" class="msg" :style="(isDoctor === 'true' && i.talkFrom === i.doctorName) || (isDoctor !== 'true' && i.talkFrom === i.userName) ? 'flex-direction:row-reverse' : ''">
         <div class="user-head">
           <div
             class="head"
             :style="` background: hsl(${getUserHead(i.userId, 'bck')}, 88%, 62%); clip-path:polygon(${getUserHead('polygon')}% 0,100% 100%,0% 100%); transform: rotate(${getUserHead(i.userId, 'rotate')}deg);border-radius: ${getUserHead(i.userId, 'boderRadius')[0]}% ${
               getUserHead(i.userId, 'boderRadius')[0]
             }% ${getUserHead(i.userId, 'boderRadius')[1]}% ${getUserHead(i.userId, 'boderRadius')[1]}%;`"
-            v-if="i.talkFrom !== i.doctorId"
+            v-if="i.talkFrom !== doctorName"
           ></div>
           <img :src="i.image" alt="" v-else style="max-width: 80%" />
-          <span v-if="i.talkFrom !== userId" :class="'leftSpan'">{{ i.talkFrom === i.doctorId ? i.doctorName : i.userName }}</span>
+          <span v-if="(isDoctor === 'true' && i.talkFrom !== i.doctorName) || (isDoctor !== 'true' && i.talkFrom !== i.userName)" :class="'leftSpan'">{{ i.talkFrom }}</span>
         </div>
         <div class="user-msg">
           <!-- :style="i.userId == userId ? ' float: right;' : ''" -->
-          <span :class="i.talkFrom == userId ? 'right' : 'left'">{{ i.text }}</span>
+          <span :class="(isDoctor === 'true' && i.talkFrom !== i.doctorName) || (isDoctor !== 'true' && i.talkFrom !== i.userName) ? 'right' : 'left'">{{ i.text }}</span>
         </div>
       </div>
     </div>
@@ -23,6 +24,70 @@
       <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" />
       <div class="btn" :class="{ ['btn-active']: contentText }" @click="sendText()">发送</div>
     </div>
+    <el-button v-if="isDoctor === 'true'" style="position: fixed; bottom: 10px; left: 64%" @click="dialogVisible = true">开处方</el-button>
+    <div class="background-grey" v-if="dialogVisible"></div>
+    <el-dialog title="开处方" :visible.sync="dialogVisible" width="30%" :before-close="cancle" style="margin-top: -80px; height: 700px; overflow-y: scroll">
+      <el-form ref="Form" :rules="rules" status-icon :model="prescription" label-width="100px">
+        <el-form-item label="诊断" prop="diagnosis">
+          <el-input v-model="prescription.diagnosis"></el-input>
+        </el-form-item>
+        <div v-for="(drugs, index) in prescription.drugs" :key="drugs.key">
+          <el-form-item
+            style="margin-top: 10px"
+            label="药品"
+            :prop="'drugs.' + index + '.value'"
+            :rules="{
+              required: true,
+              message: '名称不能为空',
+              trigger: 'blur'
+            }"
+          >
+            <el-input v-model="drugs.value"></el-input>
+          </el-form-item>
+          <el-form-item
+            label="数量"
+            :prop="'drugs.' + index + '.number'"
+            :rules="{
+              trigger: 'blur',
+              validator: validNumber
+            }"
+          >
+            <el-input v-model="drugs.number"></el-input>
+          </el-form-item>
+          <el-form-item label="使用方法" :prop="'drugs.' + index + '.methods'">
+            <el-input v-model="drugs.methods"></el-input>
+          </el-form-item>
+          <el-form-item
+            label="单价"
+            :prop="'drugs.' + index + '.money'"
+            :rules="{
+              trigger: 'blur',
+              validator: validNumber
+            }"
+          >
+            <el-input v-model="drugs.money"></el-input>
+          </el-form-item>
+          <el-form-item label="是否提供药品？" prop="sex">
+            <el-radio-group v-model="prescription.product">
+              <el-radio label="是"></el-radio>
+              <el-radio label="否"></el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-button @click.prevent="removeDomain(drugs)">删除</el-button>
+          <el-button @click.prevent="addDomain(drugs)">增加</el-button>
+        </div>
+        <el-form-item label="线上问诊费用" prop="money" style="margin-top: 10px">
+          <el-input v-model="prescription.money"></el-input>
+        </el-form-item>
+        <el-form-item label="总费用" prop="totalPay">
+          <el-input v-model="prescription.totalPay" disabled></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancle">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -45,7 +110,19 @@ export default {
       doctorMessage: [],
       anotherUsers: '',
       anotherUserName: '',
-      endTime: 0
+      endTime: 0,
+      dialogVisible: false,
+      rules: {
+        diagnosis: [{ required: true, message: '请输入诊断结果', trigger: 'blur' }]
+      },
+      // 处方
+      prescription: {
+        diagnosis: '',
+        drugs: [{ value: '', number: 0, money: 0, methods: '', key: '' }],
+        money: 0,
+        totalPay: 0,
+        product: '是'
+      }
     }
   },
   created() {
@@ -73,7 +150,49 @@ export default {
   mounted() {
     this.initWebSocket()
   },
+  watch: {
+    prescription: {
+      handler(newValue) {
+        let total = 0
+        if(newValue.product==='是'){
+          newValue.drugs.map(drugs => {
+          total += drugs.money * drugs.number
+          })
+        }
+        this.prescription.totalPay = total + +newValue.money
+      },
+      deep: true
+    }
+  },
   methods: {
+    cancle() {
+      this.dialogVisible = false
+      this.$refs['Form'].resetFields()
+    },
+    //验证表单必须为数字的项
+    validNumber(rule, value, callback) {
+      console.log(value, 'value')
+      if (isNaN(value)) {
+        callback(new Error('请输入数字值'))
+      }
+    },
+    //删除处方中的一个药品
+    removeDomain(item) {
+      var index = this.prescription.drugs.indexOf(item)
+      if (index !== -1) {
+        this.prescription.drugs.splice(index, 1)
+      }
+    },
+    //增加药品
+    addDomain() {
+      this.prescription.drugs.push({
+        value: '',
+        key: Date.now(),
+        number: '',
+        money: '',
+        methods: ''
+      })
+    },
     //根据url(用户名)作为当前用户ID
     getUserID() {
       // let time = new Date().getTime();
@@ -99,8 +218,8 @@ export default {
         doctorName: _this.doctorName,
         isDoctor: _this.isDoctor,
         image: _this.doctorImage,
-        talkTo: _this.anotherUsers,
-        talkFrom: _this.userId,
+        talkTo: _this.isDoctor === 'true' ? _this.patientName : _this.doctorName,
+        talkFrom: _this.isDoctor === 'true' ? _this.doctorName : _this.patientName,
         userName: _this.patientName,
         text: this.contentText,
         endTime: this.endTime
@@ -155,20 +274,14 @@ export default {
               }
             ]
           }
-          let doctorId
-          let patientId
-          if (_this.isDoctor === 'true') {
-            doctorId = _this.userId
-            patientId = location.hash.split('/').slice(-1)[0]
-          } else {
-            doctorId = location.hash.split('/').slice(-1)[0]
-            patientId = _this.userId
-          }
           //只筛选出当前用户和其另外一个人聊天的记录
-          _this.list = _this.list.filter(item => {
-            return (item.talkTo === doctorId && item.talkFrom === patientId) || (item.talkFrom === doctorId && item.talkTo === patientId)
-          })
-          _this.list = _this.list.sort((a, b) => a.time - b.time)
+          setTimeout(() => {
+            //因为获取到医生的姓名和病人的姓名是调用接口，需要一段时间，所以500毫秒之后执行
+            _this.list = _this.list.filter(item => {
+              return (item.talkTo === _this.doctorName && item.talkFrom === _this.patientName) || (item.talkFrom === _this.doctorName && item.talkTo === _this.patientName)
+            })
+            _this.list = _this.list.sort((a, b) => a.time - b.time)
+          }, 500)
         }
       }
     }

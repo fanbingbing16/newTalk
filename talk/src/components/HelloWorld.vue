@@ -102,7 +102,7 @@ export default {
       this.curentHistory = []
       this.history.map(item => {
         if (this.searchText && this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() > 10 ? this.date.getDate() : '0' + this.date.getDate()}` && item.userId === this.searchText) {
+          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 >= 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() >= 10 ? this.date.getDate() : '0' + this.date.getDate()}` && item.userId === this.searchText) {
             this.curentHistory.push(item)
           }
         } else if (this.searchText) {
@@ -110,7 +110,7 @@ export default {
             this.curentHistory.push(item)
           }
         } else if (this.date) {
-          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 > 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() > 10 ? this.date.getDate() : '0' + this.date.getDate()}`) {
+          if (item.date.split(' ')[0] === `${this.date.getFullYear()}-${this.date.getMonth() + 1 >= 10 ? this.date.getMonth() + 1 : '0' + (this.date.getMonth() + 1)}-${this.date.getDate() >= 10 ? this.date.getDate() : '0' + this.date.getDate()}`) {
             this.curentHistory.push(item)
           }
         } else {
@@ -181,9 +181,9 @@ export default {
       let params = {
         userId: String(_this.userId),
         msg: String(_this.contentText),
-        date: `${new Date().getFullYear()}-${new Date().getMonth() + 1 > 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() > 10 ? new Date().getDate() : '0' + new Date().getDate()} ${
-          new Date().getHours() > 10 ? new Date().getHours() : '0' + new Date().getHours()
-        }:${new Date().getMinutes() > 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() > 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}`, //将日期转成年-月-日  时：分：秒的形式
+        date: `${new Date().getFullYear()}-${new Date().getMonth() + 1 >= 10 ? new Date().getMonth() + 1 : '0' + (new Date().getMonth() + 1)}-${new Date().getDate() >= 10 ? new Date().getDate() : '0' + new Date().getDate()} ${
+          new Date().getHours() >= 10 ? new Date().getHours() : '0' + new Date().getHours()
+        }:${new Date().getMinutes() >= 10 ? new Date().getMinutes() : '0' + new Date().getMinutes()}:${new Date().getSeconds() >= 10 ? new Date().getSeconds() : '0' + new Date().getSeconds()}`, //将日期转成年-月-日  时：分：秒的形式
         isDoctor: this.isDoctor,
         image: this.currentImage,
         userName: this.currentName

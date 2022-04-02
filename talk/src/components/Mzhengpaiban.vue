@@ -1,13 +1,21 @@
 <template>
   <div class="mzpb">
+    <el-form ref="Form" :inline="true" status-icon :model="search" label-width="100px" style="margin-top: 10px">
+      <el-form-item label="科室" prop="part">
+        <el-input v-model="search.part"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="searchFun">搜索</el-button>
+      </el-form-item>
+    </el-form>
     <header>
-      <div :class="{ 'click-week': currentWeek === 0 }" @click="selectWeek(0)">星期一</div>
-      <div :class="{ 'click-week': currentWeek === 1 }" @click="selectWeek(1)">星期二</div>
-      <div :class="{ 'click-week': currentWeek === 2 }" @click="selectWeek(2)">星期三</div>
-      <div :class="{ 'click-week': currentWeek === 3 }" @click="selectWeek(3)">星期四</div>
-      <div :class="{ 'click-week': currentWeek === 4 }" @click="selectWeek(4)">星期五</div>
-      <div :class="{ 'click-week': currentWeek === 5 }" @click="selectWeek(5)">星期六</div>
-      <div :class="{ 'click-week': currentWeek === 6 }" @click="selectWeek(6)">星期日</div>
+      <div :class="{ 'click-week': currentWeek === 1 }" @click="selectWeek(1)">星期一</div>
+      <div :class="{ 'click-week': currentWeek === 2 }" @click="selectWeek(2)">星期二</div>
+      <div :class="{ 'click-week': currentWeek === 3 }" @click="selectWeek(3)">星期三</div>
+      <div :class="{ 'click-week': currentWeek === 4 }" @click="selectWeek(4)">星期四</div>
+      <div :class="{ 'click-week': currentWeek === 5 }" @click="selectWeek(5)">星期五</div>
+      <div :class="{ 'click-week': currentWeek === 6 }" @click="selectWeek(6)">星期六</div>
+      <div :class="{ 'click-week': currentWeek === 0 }" @click="selectWeek(0)">星期日</div>
     </header>
     <!-- <el-table :data="tableData" style="width: 1100px" height="660px" @cell-click="selectDoctor">
       <el-table-column prop="part" label="科室" width="80"></el-table-column>
@@ -20,7 +28,7 @@
       <div style="width: 500px; border-right: 1px solid #ebeef5">下午</div>
     </div>
     <div class="el-table">
-      <div class="row" v-for="item in tableData" :key="item.part">
+      <div class="row" v-for="item in searchData" :key="item.part">
         <div class="part">{{ item.part }}</div>
         <ol>
           <li v-for="name in item.name[0]" :key="name.id" @click="goToDetail(name)">{{ name.val }}&nbsp;</li>
@@ -48,12 +56,16 @@ export default {
   data() {
     return {
       tableData: schedule,
+      searchData: [],
       ip: 'http://localhost:3000/api/Stu/',
       schedu: [],
       week: [],
-      currentWeek: 0,
+      currentWeek: new Date().getDay(),
       tableSelect: [],
-      selectName: ''
+      selectName: '',
+      search: {
+        part: ''
+      }
     }
   },
   created() {
@@ -62,8 +74,8 @@ export default {
     this.week = time
     this.$axios
       .post(this.ip + 'searchSchedu', {
-        startTime: new Date(time[0]).getTime(),
-        endTime: new Date(`${time[6]} 23:59:59`).getTime()
+        startTime: new Date(time[1]).getTime(),
+        endTime: new Date(`${time[0]} 23:59:59`).getTime()
       })
       .then(response => {
         if (response.status === 200) {
@@ -75,6 +87,9 @@ export default {
       })
   },
   methods: {
+    searchFun() {
+      this.searchData = this.tableData.filter(item => (this.search.part ? item.part.includes(this.search.part) : true))
+    },
     goToDetail(name) {
       localStorage.setItem('doctorId', name.id)
       this.$router.push({ path: `/doctor` })
@@ -83,8 +98,12 @@ export default {
       this.selectName = name
     },
     selectWeek(number) {
-      this.currentWeek = number
-      this.changeWeekData(this.schedu, this.currentWeek)
+      //不能选择小于今天的日子，也就是说周二不能选择周一
+      if ((number !== 0 && number >= new Date().getDay()) || number === 0) {
+        console.log(111)
+        this.currentWeek = number
+        this.changeWeekData(this.schedu, this.currentWeek)
+      }
     },
     changeWeekData(data, day) {
       this.tableData = this.tableData.map(item => {
@@ -93,9 +112,10 @@ export default {
       })
       this.tableData = this.tableData.map(item => {
         data.forEach(element => {
-          let start = new Date(this.week[day]).getTime()
+          let start = new Date().getTime()
           let end = new Date(`${this.week[day]} 23:59:59`).getTime()
-          //获取周一的数据
+          console.log(start, end, new Date(element.date).getTime(), item.part === element.part, new Date(element.date).getTime() >= start, new Date(element.date).getTime() <= end)
+          //获取周一的数据 号源大于1的医生 科室对应科室
           if (element.signalSource > 0) {
             if (item.part === element.part && new Date(element.date).getTime() >= start && new Date(element.date).getTime() <= end) {
               let time = new Date(element.date).getHours()
@@ -110,6 +130,7 @@ export default {
         })
         return item
       })
+      this.searchData = this.tableData
     }
   }
 }

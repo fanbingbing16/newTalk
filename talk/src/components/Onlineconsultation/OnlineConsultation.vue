@@ -4,7 +4,7 @@
       <span>您还有一段尚未结束的线上问诊记录，是否继续？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="endOnline">新的问诊</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="$router.push({ path: '/talkdoctor/' + onlineRecord[0].doctorId })">确定</el-button>
       </span>
     </el-dialog>
     <div class="user" v-if="isDoctor !== 'true' && onlineRecord.length === 0">
@@ -15,7 +15,7 @@
         <p style="font-size: 20px">请选择一位医生</p>
         <div class="card" v-for="item in doctorMessage" :key="item.id" @click="selectDoctor(item)">
           <div class="image" style="">
-            <img :src="'data:image/jpg;base64,' + item.image" alt="" />
+            <img :src="item.image" alt="" />
           </div>
           <p>医生姓名:{{ item.name }}</p>
           <p>医生性别:{{ item.sex }}</p>
@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     endOnline() {
-      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId })
+      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: 'patient', isPrescription: '0' })
     },
     authentication(authentication) {
       this.showValidRz = false

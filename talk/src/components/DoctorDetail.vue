@@ -40,6 +40,8 @@
 import Sfz from './Sfz'
 import InputReservationInformation from './InputReservationInformation'
 import { getTime } from './getTime.js'
+import { getWeekDay } from './getWeekDay.js'
+
 export default {
   components: {
     Sfz,
@@ -47,6 +49,10 @@ export default {
   },
   created() {
     let doctorId = localStorage.getItem('doctorId')
+    let date = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`
+    const time = getWeekDay(date)
+    const startTime = new Date().getTime()
+    const endTime = new Date(`${time[0]} 23:59:59`).getTime()
     this.$axios
       .post('http://localhost:3000/api/Stu/associationQuery', { id: doctorId })
       .then(response => {
@@ -56,7 +62,7 @@ export default {
           console.log(response, 'doctorDetail')
           this.data = response.data[0]
           this.date = response.data.filter(item => {
-            if (item.signalSource > 0) {
+            if (item.signalSource > 0 && item.date >= startTime && item.date <= endTime) {
               this.signalSource.push(item.signalSource)
               return item.date
             }
