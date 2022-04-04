@@ -50,6 +50,7 @@ connection.query('select talkDoctor.*,doctor.* from talkDoctor,doctor where talk
         console.log(a, 'a')
     }
 })
+
 //调用 broadcast 广播，实现数据互通和实时更新
 wss.broadcast = function (msg) {
     wss.clients.forEach(function each(client) {
@@ -62,8 +63,22 @@ wss.on('connection', function (ws) {
     //接收前端发送过来的数据
     ws.on('message', function (e) {
         var resData = JSON.parse(e)
-        console.log('接收到来自' + resData.talkFrom + '的消息：' + resData.text, resData)
-        chatList.push({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
+        let a
+        connection.query('select talkDoctor.*,doctor.* from talkDoctor,doctor where talkDoctor.doctorId = doctor.id', [], function (err, result) {
+            if (err) {
+                console.log(err, 'err')
+            }
+            if (result) {
+                a = JSON.parse(JSON.stringify(result))
+
+            }
+        })
+        if (a.length > 0) {
+            console.log('接收到来自' + resData.talkFrom + '的消息：' + resData.text, resData)
+            chatList.push({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
+        } else {
+            chatList = []
+        }
         //利用随机数和时间戳生成随机数
         function createId() {
             let word = 'abcdefghijklmnopqrstuvwxyz'

@@ -20,6 +20,7 @@ const sqlMap = {
     searchOrderOfDoctor: 'select reservationInformation.*,talk.*   from reservationInformation,talk where reservationInformation.doctorId = ? and reservationInformation.userId = talk.userId',
     substrSignalSource: 'update scheduling set signalSource = ? where doctorId = ? and date = ?',
     addOnlineMessage: 'insert into onlinepatientinformation(id,userId,userName,sex,age,email,phone,address,dignosis,drug,infectedImage,allergiHistory,medicalInsuranceCard,medicalCard,detail,fever) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    searchOnlineMessage: 'select * from onlinepatientinformation where userId=?',
     searchTalk: 'select * from talkDoctor',
     searchTalkOfTime: 'select * from talkDoctor where time >= ? and time <= ?',
     searchTalkOfFrom: 'select * from talkDoctor where talkFrom = ?',
@@ -30,12 +31,15 @@ const sqlMap = {
     addTalk: 'insert into talkDoctor(doctorId,doctorName,userId,userName,time,text,id,endTime,talkTo,talkFrom) values (?,?,?,?,?,?,?,?,?,?)',
     addHistoryTalk: 'insert into history_online_consultion(userId,userName,doctorId,doctorName,id,endTime,startTime,info,endOf,isPrescription) values (?,?,?,?,?,?,?,?,?,?)',
     searchHistoryTalk: 'select * from history_online_consultion where doctorId=?',
-    searchMedicalMessage: 'select * from userMedicalMessage where userId = ?',
-    updateMedicalMessage: 'update userMedicalMessage set totalPay = ?,wellPayment = ? where id = ?',
+    searchMedicalMessage: 'select * from userMedicalMessage where patientId = ?',
+    updateMedicalMessage: 'update userMedicalMessage set totalPay = ?,wellPayment = ? where prescriptionNumber = ?',
     searchDoctorUser: 'select * from doctorUser',
     updataPassOfDoctor: 'update doctorUser set password = ? where id = ?',
     addDoctorUser: 'insert into doctorUser(id,name,password,text,sf_number,phone,email) values (?,?,?,?,?,?,?)',
-    addDoctor: 'insert into doctor(id,name,part,title,sex,image,detail) values (?,?,?,?,?,?,?)'
+    addDoctor: 'insert into doctor(id,name,part,title,sex,image,detail) values (?,?,?,?,?,?,?)',
+    addPrescription: 'insert into prescription(prescriptionNumber,date,diagnosis,drugs,doctorId,patientId,isProduct) values(?,?,?,?,?,?,?)',
+    searchPrescription: 'select * from onlinepatientinformation,prescription,doctor where onlinepatientinformation.userId=prescription.patientId and prescription.patientId = ? and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber and doctor.id=prescription.doctorId',
+    addBill: 'insert into usermedicalmessage(doctorId,wellPayment,patientId,prescriptionNumber) values (?,?,?,?)'
   }
 }
 

@@ -145,11 +145,28 @@ router.get('/showAllDoctor', (req, res) => {
     }
   })
 })
+// 接口：根据id查询医生
+router.post('/searchDoctorOfId', (req, res) => {
+  const sql = $sql.Stu.searchDoctorOfId
+  const params = req.body
+  console.log('查询医生 id', params)
+  if (!params.id) {
+    throw new Error('id必须传')
+  }
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
 // 接口：根据id查询医生,查找的是两个表的，还有排班表的时间,以及号源
 router.post('/associationQuery', (req, res) => {
   const sql = $sql.Stu.associationQuery
   const params = req.body
-  console.log('查询医生 id', params)
+  console.log('查询医生 id 包括排班表', params)
   if (!params.id) {
     throw new Error('id必须传')
   }
@@ -307,6 +324,21 @@ router.post('/addOnlineMessage', (req, res) => {
       }  // 
     })
 })
+//接口，根据病人id查询病人的信息
+router.post('/searchOnlineMessage', (req, res) => {
+  const sql = $sql.Stu.searchOnlineMessage
+  const params = req.body
+  console.log('添加问诊信息', params)
+  conn.query(sql, [params.patientId], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
 // 接口：查询全部聊天记录
 router.get('/searchTalk', (req, res) => {
   const sql = $sql.Stu.searchTalk
@@ -401,7 +433,7 @@ router.post('/searchMedicalMessage', (req, res) => {
   console.log('searchMedicalMessage 查询订单', params)
   conn.query(sql, [params.userId], function (err, result) {
     if (err) {
-      throw new Error(err)
+      console.log(err)
     }
     if (result) {
       jsonWrite(res, result)
@@ -414,7 +446,7 @@ router.post('/updateMedicalMessage', (req, res) => {
   const params = req.body
   console.log('更新订单数据', params)
   // totalPay = ?,wellPayment = ? where id = ?
-  conn.query(sql, [params.totalPay, params.wellPayment, params.id], function (err, result) {
+  conn.query(sql, [params.totalPay, params.wellPayment, params.prescriptionNumber], function (err, result) {
     if (err) {
       console.log(err)
     }
@@ -524,6 +556,22 @@ router.post('/endTalk', (req, res) => {
     }  // 
   })
 })
+
+// 接口：根据病人id查询病人的处方
+router.post('/searchPrescription', (req, res) => {
+  const sql = $sql.Stu.searchPrescription
+  const params = req.body
+  console.log('searchPrescription 根据病人id查询病人的处方', params)
+  conn.query(sql, [params.patientId], function (err, result) {
+    if (err) {
+      console.log(err)
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
 // 接口：查询历史线上问诊记录，根据医生查询
 router.post('/searchHistoryTalk', (req, res) => {
   const sql = $sql.Stu.searchHistoryTalk
@@ -535,6 +583,30 @@ router.post('/searchHistoryTalk', (req, res) => {
     }
     if (result) {
       jsonWrite(res, result)
+    }  // 
+  })
+})
+// 接口：医生给病人开处方
+router.post('/addPrescription', (req, res) => {
+  const sql = $sql.Stu.addPrescription
+  const params = req.body
+  // prescriptionNumber,date,diagnosis,drugs,doctorId,patientId,isProduct
+  console.log('addPrescription 医生给病人开处方', params)
+  conn.query(sql, [params.prescriptionNumber, params.date, params.diagnosis, params.drugs, params.doctorId, params.patientId, params.isProduct], function (err, result) {
+    if (err) {
+      console.log(err)
+      throw new Error(err)
+    }
+    if (result) {
+      conn.query($sql.Stu.addBill, [params.doctorId, params.wellPayment, params.patientId, params.prescriptionNumber], function (err2, result2) {
+        if (err2) {
+          console.log(err2)
+          throw new Error(err2)
+        }
+        if (result2) {
+          jsonWrite(res, result2)
+        }
+      })
     }  // 
   })
 })
