@@ -24,6 +24,7 @@
       <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" />
       <div class="btn" :class="{ ['btn-active']: contentText }" @click="sendText()">发送</div>
     </div>
+    <div class="patientMessage" v-if="isDoctor === 'true'"></div>
     <el-button v-if="isDoctor === 'true'" style="position: fixed; bottom: 10px; left: 64%" @click="dialogVisible = true">开处方</el-button>
     <div class="background-grey" v-if="dialogVisible"></div>
     <el-dialog title="开处方" :visible.sync="dialogVisible" width="30%" :before-close="cancle" style="margin-top: -80px; height: 700px; overflow-y: scroll">
@@ -67,6 +68,9 @@
           >
             <el-input v-model="drugs.money"></el-input>
           </el-form-item>
+          <el-form-item label="医嘱" prop="medicalAdvice">
+            <el-input v-model="prescription.medicalAdvice"></el-input>
+          </el-form-item>
           <el-form-item label="是否提供药品？" prop="sex">
             <el-radio-group v-model="prescription.product">
               <el-radio label="是"></el-radio>
@@ -85,7 +89,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancle">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="prescriptionAdd">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -121,6 +125,7 @@ export default {
         drugs: [{ value: '', number: 0, money: 0, methods: '', key: '' }],
         money: 0,
         totalPay: 0,
+        medicalAdvice: '',
         product: '是'
       }
     }
@@ -154,9 +159,9 @@ export default {
     prescription: {
       handler(newValue) {
         let total = 0
-        if(newValue.product==='是'){
+        if (newValue.product === '是') {
           newValue.drugs.map(drugs => {
-          total += drugs.money * drugs.number
+            total += drugs.money * drugs.number
           })
         }
         this.prescription.totalPay = total + +newValue.money
@@ -165,6 +170,46 @@ export default {
     }
   },
   methods: {
+    //确定开处方
+    // prescription
+    //prescriptionNumber,date,diagnosis,drugs,doctorId,patientId,isProduct) values(?,?,?,?,?,?,?)',
+    //doctorId,wellPayment,patientId,prescriptionNumber) values (?,?,?,?)'
+    prescriptionAdd() {
+      let message = {
+        doctorId: this.userId,
+        patientId: location.hash.split('/').slice(-1)[0],
+        prescriptionNumber: Date.now() * 2 + 10 - 100 * 2000 + 50 * 50,
+        date: Date.now(),
+        wellPayment: this.prescription.totalPay,
+        diagnosis: this.prescription.diagnosis,
+        isProduct: this.prescription.product,
+        drugs: JSON.stringify(this.prescription.drugs)
+      }
+      this.$axios.post('http://localhost:3000/api/Stu/addPrescription', message).then(response => {
+        console.log(response, 'addPrescription')
+        if (response.status === 200) {
+          this.dialogVisible = false
+          this.$confirm('是否结束此次线上问诊?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: location.hash.split('/').slice(-1)[0], endOf: 'doctor', isPrescription: '1' }).then(response => {
+                if (response.status === 200) {
+                  this.$router.push('/navigation')
+                }
+              })
+            })
+            .catch(() => {
+              this.$message({
+                type: 'info',
+                message: '继续进行线上问诊'
+              })
+            })
+        }
+      })
+    },
     cancle() {
       this.dialogVisible = false
       this.$refs['Form'].resetFields()

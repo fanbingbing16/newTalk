@@ -45,7 +45,10 @@
               <el-menu-item index="3-1"><i class="el-icon-setting"></i> <span slot="title">线上问诊</span></el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group index="3">
-              <el-menu-item index="3-2" v-if="isDoctor === 'true'"><i class="el-icon-setting"></i> <span slot="title">历史记录</span></el-menu-item>
+              <el-menu-item index="3-2" v-if="isDoctor === 'true'">
+                <i class="el-icon-setting"></i>
+                <span slot="title">历史记录</span>
+              </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="4" v-if="isDoctor !== 'true'">
@@ -59,6 +62,10 @@
           <el-menu-item index="6" v-if="isDoctor === 'true'">
             <i class="el-icon-setting"></i>
             <span slot="title">预约记录</span>
+          </el-menu-item>
+          <el-menu-item index="7" v-if="isDoctor !== 'true'">
+            <i class="el-icon-setting"></i>
+            <span slot="title">电子处方</span>
           </el-menu-item>
         </el-menu>
       </el-col>
@@ -78,7 +85,8 @@ export default {
         { value: 'history', index: '3-2' },
         { value: 'charge', index: '4' },
         { value: '/talk' + localStorage.getItem('userId'), index: '5' },
-        { value: 'reservation', index: '6' }
+        { value: 'reservation', index: '6' },
+        { value: 'prescription', index: '7' }
       ],
       curentMenu: '1-1',
       isDoctor: localStorage.getItem('isDoctor')

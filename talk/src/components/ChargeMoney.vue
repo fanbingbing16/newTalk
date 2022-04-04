@@ -7,7 +7,7 @@
 <script>
 export default {
   created() {
-    console.log(this.$route.params, 'query')
+    console.log(this.$route.params, 'query', this.$router, this.$route)
     this.inter = setInterval(() => {
       if (this.time > 0) {
         this.time--
@@ -16,7 +16,7 @@ export default {
       }
     }, 1000)
     let params = this.$route.params
-    this.$axios.post('http://localhost:3000/api/Stu/updateMedicalMessage', { totalPay: parseInt(params.totalPay) + parseInt(params.wellPayment), wellPayyment: 0, id: params.id })
+    this.$axios.post('http://localhost:3000/api/Stu/updateMedicalMessage', { totalPay: parseInt(params.totalPay) + parseInt(params.wellPayment), wellPayyment: 0, date: params.prescriptionNumber })
   },
   data() {
     return {
@@ -28,7 +28,8 @@ export default {
     back() {
       clearInterval(this.inter)
       this.inter = null
-      this.$router.push({ path: '/navigation/charge' })
+      this.$router.go(-1)
+      // this.$router.push({ path: '/navigation/charge' })
     }
   }
 }

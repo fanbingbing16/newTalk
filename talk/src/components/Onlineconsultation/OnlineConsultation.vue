@@ -4,10 +4,10 @@
       <span>您还有一段尚未结束的线上问诊记录，是否继续？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="endOnline">新的问诊</el-button>
-        <el-button type="primary" @click="$router.push({ path: '/talkdoctor/' + onlineRecord[0].doctorId })">确定</el-button>
+        <el-button type="primary" @click="$router.push({ path: '/talkdoctor/' + onlineRecord[0].doctorId })">继续</el-button>
       </span>
     </el-dialog>
-    <div class="user" v-if="isDoctor !== 'true' && onlineRecord.length === 0">
+    <div class="user" v-if="isDoctor !== 'true' && onlineRecord.length === 0 && !showMoney">
       <div class="background-grey"></div>
       <Sfz v-if="showValidRz" @authentication="authentication" @cancle="cancle"></Sfz>
       <InputBaseMessage v-if="!showValidRz && showBaseMessage" @confirm="conform"></InputBaseMessage>
@@ -17,6 +17,7 @@
           <div class="image" style="">
             <img :src="item.image" alt="" />
           </div>
+          <p>预约费用:{{ item.yuyueMoney }}</p>
           <p>医生姓名:{{ item.name }}</p>
           <p>医生性别:{{ item.sex }}</p>
           <p>医生职称:{{ item.title }}</p>
@@ -24,6 +25,9 @@
           <p>简要描述:{{ item.detail }}</p>
         </div>
       </div>
+    </div>
+    <div class="money" v-else-if="isDoctor !== 'true' && onlineRecord.length === 0 && showMoney">
+      <img src="../../assets/wechat.jpg" alt="" style="width: 40%" />
     </div>
     <talk-user v-else-if="isDoctor === 'true'"></talk-user>
   </div>
@@ -64,6 +68,8 @@ export default {
   },
   data() {
     return {
+      selectDoctorMessage: {},
+      showMoney: false,
       showValidRz: false,
       showBaseMessage: false,
       doctorMessage: [],
@@ -101,7 +107,10 @@ export default {
       // this.$router.push({ path: '/talkdoctor' })
     },
     selectDoctor(doctor) {
-      this.$router.push({ path: '/talkdoctor/' + doctor.id })
+      this.showMoney = true
+      this.selectDoctorMessage = doctor
+      // this.$router.push({ name: 'ChargeMoney', path: '/chargeMoney/' + doctor.id, params: doctor })
+      // this.$router.push({ path: '/talkdoctor/' + doctor.id })
     }
   }
 }
