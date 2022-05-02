@@ -264,7 +264,7 @@ router.post('/addOrder', (req, res) => {
   //就诊卡或者医保卡信息填入
   if (params.medicalCard) {
     const sql = $sql.Stu.addOrderOfMedicalCard
-    conn.query(sql, [params.userId, id, params.allergicHistory, params.medicalCard, params.detail, params.time, params.doctorId, params.doctorName, params.part, params.sex], function (err, result) {
+    conn.query(sql, [params.userId, id, params.allergiHistory, params.medicalCard, params.detail, params.time, params.doctorId, params.doctorName, params.part, params.sex], function (err, result) {
       if (err) {
         console.log(err)
       }
@@ -314,7 +314,7 @@ router.post('/addOnlineMessage', (req, res) => {
   conn.query(sql, [id, params.userId, params.userName, params.sex,
     params.age, params.email, params.phone, params.address, params.dignosis, params.drug,
     params.infectedImage, params.allergiHistory, params.medicalInsuranceCard, params.medicalCard,
-    params.detail, params.fever], function (err, result) {
+    params.detail, params.fever, params.prescriptionNumber], function (err, result) {
       if (err) {
         console.log(err)
       }
@@ -536,7 +536,7 @@ router.post('/endTalk', (req, res) => {
         } else {
           history.push({
             userId: item.userId, userName: item.userName, doctorId: item.doctorId, doctorName: item.doctorName, id, endTime: new Date().getTime(), startTime: item.time,
-            info: [{ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time }], endOf: params.endOf, isPrescription: params.isPrescription,
+            info: [{ text: item.text, talkTo: item.talkTo, talkFrom: item.talkFrom, time: item.time }], endOf: params.endOf, prescriptionNumber: params.prescriptionNumber
           })
         }
       })
@@ -550,8 +550,12 @@ router.post('/endTalk', (req, res) => {
           }
         })
       })
-      conn.query(sql2, [params.userId], function (err3) {
-        console.log(err3)
+      conn.query(sql2, [params.userId], function (err3, result3) {
+        if (err)
+          console.log(err3)
+        if (result3) {
+          jsonWrite(res, result3)
+        }
       })
     }  // 
   })

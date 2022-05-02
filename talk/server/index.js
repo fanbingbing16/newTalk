@@ -63,44 +63,43 @@ wss.on('connection', function (ws) {
     //接收前端发送过来的数据
     ws.on('message', function (e) {
         var resData = JSON.parse(e)
-        let a
+        let a = []
         connection.query('select talkDoctor.*,doctor.* from talkDoctor,doctor where talkDoctor.doctorId = doctor.id', [], function (err, result) {
             if (err) {
                 console.log(err, 'err')
             }
             if (result) {
                 a = JSON.parse(JSON.stringify(result))
-
-            }
-        })
-        if (a.length > 0) {
-            console.log('接收到来自' + resData.talkFrom + '的消息：' + resData.text, resData)
-            chatList.push({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
-        } else {
-            chatList = []
-        }
-        //利用随机数和时间戳生成随机数
-        function createId() {
-            let word = 'abcdefghijklmnopqrstuvwxyz'
-            let s = []
-            let getId = ''
-            for (let i = 0; i < 5; i++) {
-                s[i] = word[Math.floor(Math.random() * 25)]
-                if ((Math.random() * 5) > 1) {
-                    getId += word[Math.floor(Math.random() * 25)]
+                if (a.length > 0) {
+                    // console.log('接收到来自' + resData.talkFrom + '的消息：' + resData.text, resData)
+                    chatList.push({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime, prescriptionNumber: resData.prescriptionNumber });//每次发送信息，都会把信息存起来，然后通过广播传递出去，这样此每次进来的用户就能看到之前的数据
+                } else {
+                    chatList = []
                 }
-            }
-            getId += Math.random().toString().substr(3, 3) + s.join('') + new Date().getTime()
-            return getId
-        }
-        let id = createId()
-        console.log(id, 'id')
-        wss.broadcast(JSON.stringify({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime })); //每次发送都相当于广播一次消息
-        const sql = 'insert into talkDoctor(doctorId,doctorName,userId,userName,time,id,text,endTime,talkTo,talkFrom) values (?,?,?,?,?,?,?,?,?,?)'
-        console.log('添加', resData)
-        connection.query(sql, [resData.doctorId, resData.doctorName, resData.userId, resData.userName, resData.time, id, resData.text, resData.endTime, resData.talkTo, resData.talkFrom], function (err, result) {
-            if (err) {
-                console.log(err)
+                //利用随机数和时间戳生成随机数
+                function createId() {
+                    let word = 'abcdefghijklmnopqrstuvwxyz'
+                    let s = []
+                    let getId = ''
+                    for (let i = 0; i < 5; i++) {
+                        s[i] = word[Math.floor(Math.random() * 25)]
+                        if ((Math.random() * 5) > 1) {
+                            getId += word[Math.floor(Math.random() * 25)]
+                        }
+                    }
+                    getId += Math.random().toString().substr(3, 3) + s.join('') + new Date().getTime()
+                    return getId
+                }
+                let id = createId()
+                console.log(id, 'id')
+                wss.broadcast(JSON.stringify({ talkTo: resData.talkTo, talkFrom: resData.talkFrom, userId: resData.userId, userName: resData.userName, doctorId: resData.doctorId, doctorName: resData.doctorName, text: resData.text, image: resData.image, isDoctor: resData.isDoctor, time: resData.time, endTime: resData.endTime, prescriptionNumber: resData.prescriptionNumber })); //每次发送都相当于广播一次消息
+                const sql = 'insert into talkDoctor(doctorId,doctorName,userId,userName,time,id,text,endTime,talkTo,talkFrom,prescriptionNumber) values (?,?,?,?,?,?,?,?,?,?,?)'
+                console.log('添加', resData)
+                connection.query(sql, [resData.doctorId, resData.doctorName, resData.userId, resData.userName, resData.time, id, resData.text, resData.endTime, resData.talkTo, resData.talkFrom, resData.prescriptionNumber], function (err, result) {
+                    if (err) {
+                        console.log(err)
+                    }
+                })
             }
         })
     });
