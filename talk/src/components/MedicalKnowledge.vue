@@ -6,7 +6,7 @@
           <div class="name">{{ item.value }}</div>
         </template>
       </el-autocomplete>
-      <el-button style="position: absolute; top: 10px" @click="showAddMessage = true">增加数据</el-button>
+      <el-button style="position: absolute; top: 10px" @click="showAddMessage = true" v-if="isDoctor === 'true'">增加数据</el-button>
     </div>
     <template v-if="seartResult.length > 0">
       <div class="article" v-for="item in seartResult" :key="item.id">
@@ -38,7 +38,7 @@
 </template>
 <script>
 export default {
-  inject: ['reload'],
+  // inject: ['reload'],
   data() {
     return {
       //fullData存储数据库返回的所有信息，knowedge根据路由存储生活常识或者医学常识，seartResult存储搜素结果
@@ -78,7 +78,7 @@ export default {
           this.$axios.post('http://localhost:3000/api/Stu/addKnowledge', this.add).then(response => {
             if (response.status === 200) {
               this.cangcle()
-              this.reload()
+              // this.reload()
             }
           })
         }

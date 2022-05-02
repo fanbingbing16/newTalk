@@ -110,9 +110,10 @@ export default {
         item.name = [[], []]
         return item
       })
+      console.log(this.tableData, 'tableData')
       this.tableData = this.tableData.map(item => {
         data.forEach(element => {
-          let start = new Date().getTime()
+          let start = new Date(`${this.week[day]} 00:00:00`).getTime()
           let end = new Date(`${this.week[day]} 23:59:59`).getTime()
           console.log(start, end, new Date(element.date).getTime(), item.part === element.part, new Date(element.date).getTime() >= start, new Date(element.date).getTime() <= end)
           //获取周一的数据 号源大于1的医生 科室对应科室

@@ -44,7 +44,8 @@ export default {
   },
   methods: {
     gotoTalk(data) {
-      this.$router.push('/talkDoctor/' + data.userId)
+      localStorage.setItem('prescriptionNumber', data.prescriptionNumber)
+      this.$router.push({ path: '/talkDoctor/' + data.userId })
     },
     getUserHead(id, type) {
       return getUserHead(id, type)
@@ -86,7 +87,8 @@ export default {
                 talkFrom: resData.talkFrom,
                 userName: resData.userName,
                 text: resData.text,
-                endTime: resData.endTime
+                endTime: resData.endTime,
+                prescriptionNumber: resData.prescriptionNumber
               }
             ]
           }
@@ -105,7 +107,18 @@ export default {
               _this.talk[index].time.push(item.time)
               _this.talk[index].endTime = item.endTime ? item.endTime : null
             } else {
-              _this.talk.push({ talkTo: [item.talkTo], talkFrom: [item.talkFrom], info: [item.text], time: [item.time], endTime: item.endTime ? item.endTime : null, userId: item.userId, doctorId: item.doctorId, userName: item.userName, doctorName: item.doctorName })
+              _this.talk.push({
+                talkTo: [item.talkTo],
+                talkFrom: [item.talkFrom],
+                info: [item.text],
+                time: [item.time],
+                endTime: item.endTime ? item.endTime : null,
+                userId: item.userId,
+                doctorId: item.doctorId,
+                userName: item.userName,
+                doctorName: item.doctorName,
+                prescriptionNumber: item.prescriptionNumber
+              })
             }
           })
           _this.talk.map(item => {

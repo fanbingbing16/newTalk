@@ -1,11 +1,11 @@
 <template>
   <div id="app">
-    <div class="background-full">
+    <!-- <div class="background-full">
       <div class="bgcBottom"></div>
       <div class="bgc"></div>
       <div class="bgcPink"></div>
       <div class="bgcBlue"></div>
-    </div>
+    </div> -->
     <router-view v-if="isRouterAlive"></router-view>
   </div>
 </template>
@@ -25,21 +25,21 @@ export default {
     return {
       isRouterAlive: true
     }
-  },
-  //provide inject 实现组件的局部加载，预约成功之后号源会减一，这个时候就需要局部加载一下页面，其他页面需要局部加载的时候也可以这样
-  provide() {
-    return {
-      reload: this.reload
-    }
-  },
-  methods: {
-    reload() {
-      this.isRouterAlive = false
-      this.$nextTick(() => {
-        this.isRouterAlive = true
-      })
-    }
   }
+  //provide inject 实现组件的局部加载，预约成功之后号源会减一，这个时候就需要局部加载一下页面，其他页面需要局部加载的时候也可以这样
+  // provide() {
+  //   return {
+  //     reload: this.reload
+  //   }
+  // },
+  // methods: {
+  //   reload() {
+  //     this.isRouterAlive = false
+  //     this.$nextTick(() => {
+  //       this.isRouterAlive = true
+  //     })
+  //   }
+  // }
 }
 </script>
 

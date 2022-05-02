@@ -145,7 +145,8 @@ export default {
             type: 'success'
           })
           let userId = localStorage.getItem('userId')
-          this.$emit('confirm', true)
+          let prescriptionNumber = Date.now() * 2 - Math.floor(Math.random() * 100)
+          this.$emit('confirm', prescriptionNumber)
           this.$axios.post('http://localhost:3000/api/Stu/addOnlineMessage', {
             userId,
             userName: this.edit.name,
@@ -161,7 +162,8 @@ export default {
             medicalInsuranceCard: parseInt(this.reservationInformation.medicalInsuranceCard),
             medicalCard: parseInt(this.reservationInformation.medicalCard),
             detail: this.reservationInformation.detail,
-            fever: this.reservationInformation.fever ? '0' : '1'
+            fever: this.reservationInformation.fever ? '0' : '1',
+            prescriptionNumber
           })
         } else {
           console.log('error submit!!')

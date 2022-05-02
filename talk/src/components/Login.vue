@@ -75,7 +75,7 @@ export default {
   created() {
     this.$axios.get(this.ip + 'showStu').then(response => {
       this.test = response.data
-      // console.log(response.data)
+      console.log(response)
     })
   },
   methods: {
@@ -114,6 +114,7 @@ export default {
         if (valid) {
           let id = ''
           this.$axios.get(this.ip + 'searchDoctorUser').then(response => {
+            console.log(response, 'doctor login')
             let boo = response.data.some(item => {
               if (item.name === this.ruleForm2.age) {
                 if (item.password === this.ruleForm2.pass) {

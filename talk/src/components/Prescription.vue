@@ -52,8 +52,10 @@ export default {
   },
   methods: {
     search() {
+      console.log(111)
       this.searchPrescriptions = this.prescriptions.filter(item => {
-        item.diagnosis.includes(this.searchText)
+        console.log(this.searchText, item.diagnosis.includes(this.searchText), item)
+        return item.diagnosis.includes(this.searchText)
       })
     }
   }

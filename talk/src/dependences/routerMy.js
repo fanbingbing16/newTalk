@@ -45,7 +45,7 @@ const routes = [
       { path: 'mengzhengpaiban', component: Mzhengpaiban },
       { path: ':id/medicalknowledge', component: MedicalKnowledge },
       {
-        path: 'onlineconsultation', component: OnlineConsultation
+        path: 'onlineconsultation', component: OnlineConsultation,
       },
       {
         path: 'history', component: History
@@ -59,7 +59,7 @@ const routes = [
       }
     ]
   },
-  { path: '/talkdoctor/:id', component: Talk },
+  { path: '/talkdoctor/:id', component: Talk, name: 'talkdoctor' },
   {
     path: '/doctor', component: DoctorDetail
   },
@@ -79,15 +79,15 @@ const router = new VueRouter({
 //路由守卫，防止用户没有登录就进入聊天室,（现在改成任何页面都不可以进去，除非登录）
 router.beforeEach((to, from, next) => {
   //talk是聊天室
-  if (to.path !== '/login') {
+  if (to.path === '/login' || to.path === '/forword' || to.path === '/register' || to.path === '/doctor/register') {
+    next()
+  } else {
     if (!localStorage.getItem("userId")) {
       next('/login')
     }
     else {
       next()
     }
-  } else {
-    next()
   }
 })
 export default router

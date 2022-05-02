@@ -16,8 +16,8 @@
         <el-form-item label="是女生吗?" prop="sex">
           <el-switch v-model="ruleForm.sex"></el-switch>
         </el-form-item>
-        <el-form-item label="过敏史" prop="allergicHistory">
-          <el-input v-model="ruleForm.allergicHistory"></el-input>
+        <el-form-item label="过敏史" prop="allergiHistory">
+          <el-input v-model="ruleForm.allergiHistory"></el-input>
         </el-form-item>
         <el-form-item label="请简单描述一下您的病情" prop="detail">
           <el-input v-model="ruleForm.detail"></el-input>
@@ -34,7 +34,7 @@
 <script>
 export default {
   props: ['date', 'time', 'doctorMessage', 'signalSource'],
-  inject: ['reload'],
+  // inject: ['reload'],
   created() {
     let userId = localStorage.getItem('userId')
     this.$axios.post('http://localhost:3000/api/Stu/showOfId', { userId }).then(response => {
@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       ruleForm: {
-        allergicHistory: '',
+        allergiHistory: '',
         medicalInsuranceCard: '',
         medicalCard: '',
         isMedicalInsuranceCard: false,
@@ -54,7 +54,7 @@ export default {
         sex: false
       },
       rules: {
-        allergicHistory: { required: true, message: '请输入过敏史', trigger: 'blur' },
+        allergiHistory: { required: true, message: '请输入过敏史', trigger: 'blur' },
         medicalInsuranceCard: { message: '请输入医保卡', trigger: 'blur' },
         medicalCard: { message: '请输入就诊卡', trigger: 'blur' }
       },
@@ -130,7 +130,7 @@ export default {
         if (this.ruleForm.isMedicalInsuranceCard) {
           params = {
             userId,
-            allergicHistory: this.ruleForm.allergicHistory,
+            allergiHistory: this.ruleForm.allergiHistory,
             medicalInsuranceCard: parseInt(this.ruleForm.medicalInsuranceCard),
             detail: this.ruleForm.detail,
             time,
@@ -142,7 +142,7 @@ export default {
         } else {
           params = {
             userId,
-            allergicHistory: this.ruleForm.allergicHistory,
+            allergiHistory: this.ruleForm.allergiHistory,
             medicalCard: parseInt(this.ruleForm.medicalCard),
             detail: this.ruleForm.detail,
             time,
@@ -169,7 +169,7 @@ export default {
                     message: '恭喜你,预约成功',
                     type: 'success'
                   })
-                  this.reload()
+                  // this.reload()
                 }
               })
               .catch(err => console.log(err))

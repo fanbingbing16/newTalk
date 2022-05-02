@@ -24,8 +24,47 @@
       <input type="text" ref="sendMsg" v-model="contentText" @keyup.enter="sendText()" />
       <div class="btn" :class="{ ['btn-active']: contentText }" @click="sendText()">发送</div>
     </div>
+    <div class="patientMessageOfId">
+      <p>病人信息</p>
+      <el-form ref="Form" status-icon :model="patientMessage" label-width="100px" :disabled="true">
+        <el-form-item label="姓名" prop="userName">
+          <el-input :value="patientMessage.userName"></el-input>
+        </el-form-item>
+        <el-form-item label="性别" prop="sex">
+          <el-input :value="patientMessage.sex === '0' ? '男' : '女'"></el-input>
+        </el-form-item>
+        <el-form-item label="年龄" prop="age">
+          <el-input :value="patientMessage.age"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input :value="patientMessage.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话号码" prop="phone">
+          <el-input :value="patientMessage.phone"></el-input>
+        </el-form-item>
+        <el-form-item label="地址" prop="address">
+          <el-input :value="patientMessage.address"></el-input>
+        </el-form-item>
+        <el-form-item label="上个医生的诊断书" prop="dignosis">
+          <img :src="patientMessage.dignosis" alt="" />
+        </el-form-item>
+        <el-form-item label="吃过的药" prop="drug">
+          <el-input :value="patientMessage.drug"></el-input>
+        </el-form-item>
+        <el-form-item label="地址" prop="address">
+          <el-input :value="patientMessage.address"></el-input>
+        </el-form-item>
+        <el-form-item label="患处照片" prop="infectedImage">
+          <img :src="patientMessage.infectedImage" alt="" />
+        </el-form-item>
+        <el-form-item label="病情的描述" prop="detail">
+          <el-input :value="patientMessage.detail"></el-input>
+        </el-form-item>
+      </el-form>
+    </div>
     <div class="patientMessage" v-if="isDoctor === 'true'"></div>
     <el-button v-if="isDoctor === 'true'" style="position: fixed; bottom: 10px; left: 64%" @click="dialogVisible = true">开处方</el-button>
+    <el-button style="position: fixed; bottom: 60px; left: 63%" @click="endOnline">结束问诊</el-button>
     <div class="background-grey" v-if="dialogVisible"></div>
     <el-dialog title="开处方" :visible.sync="dialogVisible" width="30%" :before-close="cancle" style="margin-top: -80px; height: 700px; overflow-y: scroll">
       <el-form ref="Form" :rules="rules" status-icon :model="prescription" label-width="100px">
@@ -68,18 +107,18 @@
           >
             <el-input v-model="drugs.money"></el-input>
           </el-form-item>
-          <el-form-item label="医嘱" prop="medicalAdvice">
-            <el-input v-model="prescription.medicalAdvice"></el-input>
-          </el-form-item>
-          <el-form-item label="是否提供药品？" prop="sex">
-            <el-radio-group v-model="prescription.product">
-              <el-radio label="是"></el-radio>
-              <el-radio label="否"></el-radio>
-            </el-radio-group>
-          </el-form-item>
           <el-button @click.prevent="removeDomain(drugs)">删除</el-button>
           <el-button @click.prevent="addDomain(drugs)">增加</el-button>
         </div>
+        <el-form-item label="医嘱" prop="medicalAdvice">
+          <el-input v-model="prescription.medicalAdvice"></el-input>
+        </el-form-item>
+        <el-form-item label="是否提供药品？" prop="sex">
+          <el-radio-group v-model="prescription.product">
+            <el-radio label="是"></el-radio>
+            <el-radio label="否"></el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="线上问诊费用" prop="money" style="margin-top: 10px">
           <el-input v-model="prescription.money"></el-input>
         </el-form-item>
@@ -107,6 +146,8 @@ export default {
       list: [], //聊天记录的数组
       contentText: '', //input输入的值
       talk: [],
+      prescriptionNumber: 0,
+      patientMessage: {},
       isDoctor: '',
       doctorImage: '',
       doctorName: '',
@@ -148,7 +189,16 @@ export default {
     patientId = this.isDoctor === 'true' ? this.anotherUsers : this.userId
     this.$axios.post('http://localhost:3000/api/Stu/showOfId', { userId: patientId }).then(response => {
       if (response.status === 200) {
-        this.patientName = response.data[0].userName
+        this.patientName = response.data[0]?.userName
+      }
+    })
+    this.prescriptionNumber = localStorage.getItem('prescriptionNumber')
+    this.$axios.post('http://localhost:3000/api/Stu/searchOnlineMessage', { patientId }).then(response => {
+      if (response.status === 200) {
+        this.patientMessage = response.data.filter(item => {
+          console.log(item.prescriptionNumber === +this.prescriptionNumber, item, +this.prescriptionNumber)
+          return item.prescriptionNumber === +this.prescriptionNumber
+        })?.[0]
       }
     })
   },
@@ -170,15 +220,37 @@ export default {
     }
   },
   methods: {
+    endOnline() {
+      this.$confirm(' 您确定要结束线上问诊吗？', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '点错了'
+      })
+        .then(() => {
+          this.$message({
+            type: 'info',
+            message: '您已退出结束本次线上问诊'
+          })
+          this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: this.isDoctor === 'true' ? 'doctor' : 'patient', prescriptionNumber: this.prescriptionNumber }).then(response => {
+            if (response.status === 200) {
+              this.$router.push({ path: '/navigation/2/medicalKnowledge' })
+            }
+          })
+        })
+        .catch(action => {
+          this.$message({
+            type: 'info',
+            message: action === 'cancel' ? '停留在该页面' : '您已取消'
+          })
+        })
+    },
     //确定开处方
     // prescription
-    //prescriptionNumber,date,diagnosis,drugs,doctorId,patientId,isProduct) values(?,?,?,?,?,?,?)',
-    //doctorId,wellPayment,patientId,prescriptionNumber) values (?,?,?,?)'
     prescriptionAdd() {
       let message = {
         doctorId: this.userId,
         patientId: location.hash.split('/').slice(-1)[0],
-        prescriptionNumber: Date.now() * 2 + 10 - 100 * 2000 + 50 * 50,
+        prescriptionNumber: this.prescriptionNumber,
         date: Date.now(),
         wellPayment: this.prescription.totalPay,
         diagnosis: this.prescription.diagnosis,
@@ -186,7 +258,6 @@ export default {
         drugs: JSON.stringify(this.prescription.drugs)
       }
       this.$axios.post('http://localhost:3000/api/Stu/addPrescription', message).then(response => {
-        console.log(response, 'addPrescription')
         if (response.status === 200) {
           this.dialogVisible = false
           this.$confirm('是否结束此次线上问诊?', '提示', {
@@ -195,7 +266,7 @@ export default {
             type: 'warning'
           })
             .then(() => {
-              this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: location.hash.split('/').slice(-1)[0], endOf: 'doctor', isPrescription: '1' }).then(response => {
+              this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: location.hash.split('/').slice(-1)[0], endOf: 'doctor' }).then(response => {
                 if (response.status === 200) {
                   this.$router.push('/navigation')
                 }
@@ -216,7 +287,6 @@ export default {
     },
     //验证表单必须为数字的项
     validNumber(rule, value, callback) {
-      console.log(value, 'value')
       if (isNaN(value)) {
         callback(new Error('请输入数字值'))
       }
@@ -262,11 +332,12 @@ export default {
         doctorId: _this.isDoctor === 'true' ? _this.userId : _this.anotherUsers,
         doctorName: _this.doctorName,
         isDoctor: _this.isDoctor,
-        image: _this.doctorImage,
+        image: _this.isDoctor === 'true' ? _this.doctorImage : '',
         talkTo: _this.isDoctor === 'true' ? _this.patientName : _this.doctorName,
         talkFrom: _this.isDoctor === 'true' ? _this.doctorName : _this.patientName,
         userName: _this.patientName,
         text: this.contentText,
+        prescriptionNumber: this.prescriptionNumber,
         endTime: this.endTime
       }
       _this.ws.send(JSON.stringify(params)) //调用WebSocket send()发送信息的方法
@@ -314,6 +385,7 @@ export default {
                 talkTo: resData.talkTo,
                 talkFrom: resData.talkFrom,
                 userName: resData.userName,
+                prescriptionNumber: resData.prescriptionNumber,
                 text: resData.text,
                 endTime: resData.endTime
               }
@@ -335,6 +407,15 @@ export default {
 </script>
 
 <style scoped>
+.patientMessageOfId {
+  top: 100px;
+  position: absolute;
+  left: 768px;
+  width: 66%;
+  background: white;
+  height: 500px;
+  overflow-y: scroll;
+}
 .chat-box header {
   position: fixed;
   width: 100%;

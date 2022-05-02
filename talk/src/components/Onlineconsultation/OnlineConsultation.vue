@@ -4,7 +4,7 @@
       <span>您还有一段尚未结束的线上问诊记录，是否继续？</span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="endOnline">新的问诊</el-button>
-        <el-button type="primary" @click="$router.push({ path: '/talkdoctor/' + onlineRecord[0].doctorId })">继续</el-button>
+        <el-button type="primary" @click="continueTo">继续</el-button>
       </span>
     </el-dialog>
     <div class="user" v-if="isDoctor !== 'true' && onlineRecord.length === 0 && !showMoney">
@@ -27,7 +27,8 @@
       </div>
     </div>
     <div class="money" v-else-if="isDoctor !== 'true' && onlineRecord.length === 0 && showMoney">
-      <img src="../../assets/wechat.jpg" alt="" style="width: 40%" />
+      <img src="../../assets/wechat.jpg" alt="" style="width: 60%; margin-top: -100px" />
+      <p>{{ minute }}秒支付时间 <span style="color: blue" @click="complete">支付完成</span></p>
     </div>
     <talk-user v-else-if="isDoctor === 'true'"></talk-user>
   </div>
@@ -42,7 +43,7 @@ export default {
     InputBaseMessage,
     TalkUser
   },
-  inject: ['reload'],
+  // inject: ['reload'],
   created() {
     let authentication = localStorage.getItem('authentication')
     this.userId = localStorage.getItem('userId')
@@ -68,7 +69,8 @@ export default {
   },
   data() {
     return {
-      selectDoctorMessage: {},
+      minute: 30,
+      inter: null,
       showMoney: false,
       showValidRz: false,
       showBaseMessage: false,
@@ -76,12 +78,23 @@ export default {
       isDoctor: localStorage.getItem('isDoctor'),
       onlineRecord: [],
       userId: '',
-      dialogVisible: false
+      dialogVisible: false,
+      selectDoctorObj: {},
+      prescriptionNumber: 0
     }
   },
   methods: {
+    continueTo() {
+      localStorage.setItem('prescriptionNumber', this.onlineRecord[0].prescriptionNumber)
+      this.$router.push({ path: '/talkdoctor/' + this.onlineRecord[0].doctorId, params: { id: this.onlineRecord[0].doctorId, prescriptionNumber: this.onlineRecord[0].prescriptionNumber }, name: 'talkdoctor' })
+    },
+    complete() {
+      localStorage.setItem('prescriptionNumber', this.prescriptionNumber)
+      this.$router.push({ path: '/talkdoctor/' + this.selectDoctorObj.id })
+    },
     endOnline() {
-      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: 'patient', isPrescription: '0' })
+      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: 'patient' })
+      this.showBaseMessage = true
     },
     authentication(authentication) {
       this.showValidRz = false
@@ -100,17 +113,26 @@ export default {
     cancle() {
       this.showValidRz = false
       this.$router.push({ path: 'mengzhengpaiban' })
-      this.reload()
+      // this.reload()
     },
-    conform() {
+    conform(prescriptionNumber) {
+      this.prescriptionNumber = prescriptionNumber
       this.showBaseMessage = false
       // this.$router.push({ path: '/talkdoctor' })
     },
     selectDoctor(doctor) {
       this.showMoney = true
-      this.selectDoctorMessage = doctor
+      this.selectDoctorObj = doctor
       // this.$router.push({ name: 'ChargeMoney', path: '/chargeMoney/' + doctor.id, params: doctor })
-      // this.$router.push({ path: '/talkdoctor/' + doctor.id })
+      this.inter = setInterval(() => {
+        if (this.minute > 0) this.minute--
+        else {
+          localStorage.setItem('prescriptionNumber', this.prescriptionNumber)
+          this.$router.push({ path: '/talkdoctor/' + doctor.id })
+          clearInterval(this.inter)
+          this.inter = null
+        }
+      }, 1000)
     }
   }
 }

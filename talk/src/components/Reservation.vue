@@ -21,7 +21,7 @@
         <p>就诊卡：{{ item.medicalCard }}</p>
         <p>医保卡：{{ item.medicalInsuranceCard }}</p>
         <p>简要描述：{{ item.detail }}</p>
-        <p>过敏史：{{ item.allergicHistory }}</p>
+        <p>过敏史：{{ item.allergiHistory }}</p>
         <p>身份证：{{ item.sfz_number }}</p>
         <p>性别：{{ item.sex }}</p>
       </div>
@@ -39,11 +39,9 @@ export default {
       console.log(response, 'response')
       if (response.status === 200) {
         this.data = response.data.filter(item => {
-          if (item.time > new Date().getTime()) {
-            item.sfz_number = String(item.sfz_number)
-            item.sfz_number = item.sfz_number.substr(0, 4) + 'xxxxxxxxxxxxxx'
-            return item
-          }
+          item.sfz_number = String(item.sfz_number)
+          item.sfz_number = item.sfz_number.substr(0, 4) + 'xxxxxxxxxxxxxx'
+          return item
         })
         this.searchData = this.data
       }
