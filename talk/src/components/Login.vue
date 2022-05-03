@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm" style="height: 40%">
     <el-alert title="您的输入有误" type="error" description="请您再检查一下您的用户名和密码" show-icon v-if="haveError"> </el-alert>
     <el-form-item label="用户名" prop="age">
       <el-input v-model.number="ruleForm2.age"></el-input>
@@ -126,7 +126,7 @@ export default {
             if (boo) {
               localStorage.setItem('userId', id)
               localStorage.setItem('isDoctor', true)
-              this.$router.push({ path: '/navigation/1/medicalKnowledge' })
+              this.$router.push({ path: '/navigation/welcome' })
             } else {
               this.haveError = true
             }
@@ -139,6 +139,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .el-alert--error.is-light {
   position: fixed;
@@ -158,4 +159,7 @@ export default {
   font-family: serif;
   font-weight: 100;
 }
+/* form.el-form.demo-ruleForm {
+  height: 40%;
+} */
 </style>

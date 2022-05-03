@@ -16,6 +16,11 @@ import RegisterDoctor from '../components/RegisterDoctor'
 import Reservation from '../components/Reservation'
 import History from '../components/Onlineconsultation/History'
 import Prescription from '../components/Prescription'
+import Welcome from '../components/Welcome'
+import ManageLogin from '../components/manage/Login'
+import ManageNavigation from '../components/manage/Navigation'
+import ManagePrescription from '../components/manage/Prescription'
+import ManageMengZheng from '../components/manage/MengZheng'
 import App from '../App.vue'
 
 import Vue from 'vue'
@@ -34,13 +39,14 @@ Vue.use(VueRouter)
 // 我们晚点再讨论嵌套路由。
 const routes = [
   { path: '/', component: App, redirect: '/login' },
+  { path: '/manage/login', component: ManageLogin },
   { path: '/login', component: Login },
   { path: '/talk/:id', component: HelloWorld },
   { path: '/forword', component: Forword },
   { path: '/register', component: Register },
   { path: '/select/:id', component: Select },
   {
-    path: '/navigation', component: Navigation, redirect: 'navigation/1/medicalknowledge',
+    path: '/navigation', component: Navigation, redirect: 'navigation/welcome',
     children: [
       { path: 'mengzhengpaiban', component: Mzhengpaiban },
       { path: ':id/medicalknowledge', component: MedicalKnowledge },
@@ -56,7 +62,21 @@ const routes = [
       { path: 'reservation', component: Reservation },
       {
         path: 'prescription', component: Prescription
+      },
+      {
+        path: 'welcome', component: Welcome
       }
+    ]
+  },
+  {
+    path: '/manage/navigation', component: ManageNavigation, redirect: '/manage/navigation/welcome', children: [
+      {
+        path: 'welcome', component: Welcome
+      },
+      {
+        path: 'prescription', component: ManagePrescription
+      },
+      { path: 'mengzheng', component: ManageMengZheng }
     ]
   },
   { path: '/talkdoctor/:id', component: Talk, name: 'talkdoctor' },
@@ -79,7 +99,7 @@ const router = new VueRouter({
 //路由守卫，防止用户没有登录就进入聊天室,（现在改成任何页面都不可以进去，除非登录）
 router.beforeEach((to, from, next) => {
   //talk是聊天室
-  if (to.path === '/login' || to.path === '/forword' || to.path === '/register' || to.path === '/doctor/register') {
+  if (to.path === '/manage/login' || to.path === '/login' || to.path === '/forword' || to.path === '/register' || to.path === '/doctor/register') {
     next()
   } else {
     if (!localStorage.getItem("userId")) {

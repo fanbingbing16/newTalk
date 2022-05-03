@@ -59,7 +59,7 @@ export default {
   position: relative;
   margin-top: 0.1px;
 }
-.bgc {
+/* .bgc {
   background-color: yellow;
   height: 91%;
   width: 53%;
@@ -77,7 +77,7 @@ export default {
   box-shadow: 10px 10px 5px #888888;
   position: fixed;
   top: 41%;
-  /* right: -19%; */
+  right: -19%;
   left: 65%;
 }
 .bgcBlue {
@@ -88,7 +88,7 @@ export default {
   box-shadow: 10px 10px 5px #888888;
   position: fixed;
   top: -87%;
-  /* right: -19%; */
+   right: -19%; 
   left: 15%;
 }
 .bgcBottom {
@@ -99,12 +99,17 @@ export default {
   box-shadow: 10px 10px 5px 5px #888888;
   position: fixed;
   top: 34%;
-  /* right: -19%; */
+   right: -19%; 
   left: 15%;
-}
+} */
 form.el-form.demo-ruleForm {
+  padding-top: 2%;
+  padding-right: 2%;
   margin-top: 12%;
   width: 29%;
+  /* height: 40%; */
   z-index: 9999;
+  border: 1px solid #e7e3e3;
+  box-shadow: 1px 1px 9px 1px #e9e7e7;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="register-ruleForm demo-ruleForm">
     <el-alert title="您的输入有误" type="error" description="请您再检查一下您的用户名和密码" show-icon v-if="haveError"> </el-alert>
     <el-form-item label="用户名" prop="age">
       <el-input v-model.number="ruleForm2.age"></el-input>
@@ -21,7 +21,7 @@
       <el-button type="primary" @click="returnLogin">返回</el-button>
       <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
       <el-button @click="resetForm('ruleForm2')">重置</el-button>
-      <router-link to="/doctor/register" style="margin-left:2px;">医生?注册医生账号</router-link>
+      <router-link to="/doctor/register" style="margin-left: 2px">医生?注册医生账号</router-link>
     </el-form-item>
   </el-form>
 </template>
@@ -145,6 +145,9 @@ export default {
   position: fixed;
   top: 100px;
   width: 34%;
+}
+.register-ruleForm {
+  height: 54%;
 }
 .text span {
   position: absolute;

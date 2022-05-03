@@ -233,7 +233,7 @@ export default {
           })
           this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: this.isDoctor === 'true' ? 'doctor' : 'patient', prescriptionNumber: this.prescriptionNumber }).then(response => {
             if (response.status === 200) {
-              this.$router.push({ path: '/navigation/2/medicalKnowledge' })
+              this.$router.push({ path: '/navigation/welcome' })
             }
           })
         })

@@ -216,6 +216,8 @@ ol {
 }
 .tac.el-row {
   width: 200px !important;
+  border: 1px solid #d9d9d9;
+  box-shadow: 4px 8px 17px #eeeeee;
 }
 .el-col-12 {
   width: 100%;

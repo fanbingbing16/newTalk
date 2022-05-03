@@ -1,7 +1,6 @@
 <template>
-  <div style="z-index: 2">
-    <el-button type="primary" @click="GoBackSelect(0)" class="reback" v-if="isDoctor !== 'true'">返回首页</el-button>
-    <el-button type="primary" @click="GoBackSelect(1)" class="reback" v-else>退出</el-button>
+  <div style="z-index: 2; width: 100%">
+    <el-button type="primary" @click="GoBackSelect(1)" class="reback">退出</el-button>
 
     <el-row class="tac">
       <el-col :span="12">
@@ -9,25 +8,19 @@
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>医学常识</span>
+              <span>医生管理</span>
             </template>
             <el-menu-item-group index="1">
               <el-menu-item index="1-1">
                 <i class="el-icon-menu"></i>
-                <span slot="title">医学常识</span>
-              </el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group index="1">
-              <el-menu-item index="1-2">
-                <i class="el-icon-menu"></i>
-                <span slot="title">生活常识</span>
+                <span slot="title">医生管理</span>
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
-          <el-submenu index="2" v-if="isDoctor !== 'true'">
+          <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-document"></i>
-              <span slot="title">预约挂号</span>
+              <span slot="title">药品管理</span>
             </template>
             <el-menu-item-group index="2">
               <el-menu-item index="2-1">
@@ -39,33 +32,29 @@
           <el-submenu index="3">
             <template slot="title">
               <i class="el-icon-setting"></i>
-              <span slot="title">线上问诊</span>
+              <span slot="title">处方</span>
             </template>
             <el-menu-item-group index="3">
-              <el-menu-item index="3-1"><i class="el-icon-setting"></i> <span slot="title">线上问诊</span></el-menu-item>
+              <el-menu-item index="3-1"><i class="el-icon-setting"></i> <span slot="title">开处方</span></el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group index="3">
-              <el-menu-item index="3-2" v-if="isDoctor === 'true'">
+              <el-menu-item index="3-2">
                 <i class="el-icon-setting"></i>
-                <span slot="title">历史记录</span>
+                <span slot="title">查看处方</span>
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
-          <el-menu-item index="4" v-if="isDoctor !== 'true'">
+          <el-menu-item index="4">
             <i class="el-icon-setting"></i>
-            <span slot="title">门诊收银</span>
+            <span slot="title">预约记录</span>
           </el-menu-item>
           <el-menu-item index="5">
             <i class="el-icon-setting"></i>
             <span slot="title">聊天室</span>
           </el-menu-item>
-          <el-menu-item index="6" v-if="isDoctor === 'true'">
+          <el-menu-item index="6">
             <i class="el-icon-setting"></i>
-            <span slot="title">预约记录</span>
-          </el-menu-item>
-          <el-menu-item index="7" v-if="isDoctor !== 'true'">
-            <i class="el-icon-setting"></i>
-            <span slot="title">电子处方</span>
+            <span slot="title">门诊排班</span>
           </el-menu-item>
         </el-menu>
       </el-col>
@@ -75,6 +64,7 @@
 </template>
 <script>
 export default {
+  name: 'ManageNavigation',
   data() {
     return {
       menuArr: [
@@ -82,15 +72,14 @@ export default {
         { value: '1/medicalKnowledge', index: '1-1' },
         { value: '2/medicalKnowledge', index: '1-2' },
         { value: 'onlineconsultation', index: '3-1' },
-        { value: 'history', index: '3-2' },
+        { value: 'prescription', index: '3-2' },
         { value: 'charge', index: '4' },
         { value: '/talk' + localStorage.getItem('userId'), index: '5' },
-        { value: 'reservation', index: '6' },
+        { value: 'mengzheng', index: '6' },
         { value: 'prescription', index: '7' },
         { value: 'welcome', index: '0' }
       ],
-      curentMenu: '1-1',
-      isDoctor: localStorage.getItem('isDoctor')
+      curentMenu: '1-1'
     }
   },
   created() {
@@ -119,7 +108,7 @@ export default {
       //点击菜单跳转到对应的子路由页面
       if (index !== '5') {
         let select = this.menuArr.filter(item => item?.index === index)[0]?.value
-        this.$router.push({ path: `/navigation/${select}` })
+        this.$router.push({ path: `/manage/navigation/${select}` })
       } else {
         this.$router.push({ path: '/talk/' + localStorage.getItem('userId') })
       }
@@ -136,7 +125,6 @@ export default {
             localStorage.removeItem('userId')
             localStorage.removeItem('doctorId')
             localStorage.removeItem('authentication')
-            localStorage.removeItem('isDoctor')
             this.$router.push({ path: '/login' })
           })
           .catch(() => {

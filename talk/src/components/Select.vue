@@ -1,5 +1,6 @@
 <template>
   <div class="select">
+    <div class="bgc"></div>
     <div class="doctor">欢迎您的到来</div>
     <div class="img" @mouseover="overImg" @mouseleave="leaveImg">
       <img src="../assets/doctor.jpg" alt="image" v-if="currentImg === 0" />
@@ -115,20 +116,26 @@ export default {
 .select .doctor {
   margin-top: 100px;
   font-size: 32px;
-  color: white;
+  /* color: white; */
 }
 .img {
   position: relative;
-  height: 334px;
-  width: 500px;
+  /* height: 334px; */
+  /* width: 500px; */
+  height: 600px;
+  width: 1200px;
+  overflow: hidden;
+}
+.img img {
+  width: 100%;
 }
 .img .pre {
   top: 0;
   width: 27px;
   background: white;
-  height: 334px;
+  height: 600px;
   opacity: 0.5;
-  line-height: 334px;
+  line-height: 600px;
   position: absolute;
   cursor: context-menu;
   user-select: none;
@@ -138,9 +145,9 @@ export default {
   width: 27px;
   right: 0;
   background: white;
-  height: 334px;
+  height: 600px;
   opacity: 0.5;
-  line-height: 334px;
+  line-height: 600px;
   position: absolute;
   cursor: context-menu;
   user-select: none;
@@ -156,11 +163,18 @@ export default {
   /* left: 303px; */
 }
 .caid {
-  display: flex;
+  position: fixed;
+  top: 489px;
+  right: 200px;
+  /* display: flex; */
   margin-left: 530px;
   margin-top: -273px;
   flex-wrap: wrap;
   width: 210px;
+  /* z-index: 999; */
+  background: #fff;
+  width: 90px;
+  box-shadow: -2px 2px 10px 1px #d9d9d9;
 }
 .caid div {
   height: 60px;

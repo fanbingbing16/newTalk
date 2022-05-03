@@ -25,11 +25,6 @@
     <el-form-item label="简要描述" prop="detail">
       <el-input v-model="ruleForm2.detail"></el-input>
     </el-form-item>
-    <el-form-item label="所属科室" prop="part">
-      <el-select v-model="ruleForm2.part" placeholder="请选择科室">
-        <el-option v-for="item in schedule" :key="item.part" :label="item.part" :value="item.part"></el-option>
-      </el-select>
-    </el-form-item>
     <el-form-item label="最近的照片" prop="image">
       <el-upload action="#" list-type="picture-card" :auto-upload="false" :limit="1" :on-change="changeImage">
         <i slot="default" class="el-icon-plus"></i>
@@ -48,6 +43,11 @@
     <el-form-item label="秘密文本" prop="text" class="text">
       <el-input type="password" v-model="ruleForm2.text" auto-complete="off"></el-input>
       <span>该秘密文本将用于您的密码找回，请您一定要记住！</span>
+    </el-form-item>
+    <el-form-item label="所属科室" prop="part">
+      <el-select v-model="ruleForm2.part" placeholder="请选择科室">
+        <el-option v-for="item in schedule" :key="item.part" :label="item.part" :value="item.part"></el-option>
+      </el-select>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="returnLogin">返回</el-button>
@@ -189,7 +189,7 @@ export default {
                 sex: this.ruleForm2.sex,
                 image: this.ruleForm2.image,
                 detail: this.ruleForm2.detail,
-                title:this.ruleForm2.title
+                title: this.ruleForm2.title
               })
               .then(response => {
                 console.log(response, 'response')
@@ -229,8 +229,9 @@ export default {
 </style>
 <style>
 .RegisterDoctor {
-  margin-top: 6%;
+  margin-top: 2% !important;
   z-index: 2;
+  height: 120% !important;
 }
 .RegisterDoctor .is-checked span {
   color: white !important;

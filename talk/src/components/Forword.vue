@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
+  <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm forward-ruleForm">
     <div class="title"><span>修改密码</span></div>
     <el-alert title="您的输入有误" type="error" description="请您再检查一下您的用户名和密码，如果您的秘密文本忘记那很抱歉您可能需要注销账号了" show-icon v-if="haveError"> </el-alert>
     <el-form-item label="用户名" prop="age">
@@ -186,5 +186,10 @@ export default {
   position: fixed;
   top: 100px;
   width: 34%;
+}
+</style>
+<style>
+.forward-ruleForm {
+  height: 60%;
 }
 </style>

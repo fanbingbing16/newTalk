@@ -27,15 +27,26 @@
 <script>
 import { getDetailTime } from './getTime'
 export default {
+  props: ['isManage'],
   created() {
     this.userId = localStorage.getItem('userId')
-    this.$axios.post('http://localhost:3000/api/Stu/searchPrescription', { patientId: this.userId }).then(response => {
-      if (response.status === 200) {
-        this.prescriptions = response.data
-        this.prescriptions = this.prescriptions.sort((a, b) => b.date - a.date)
-        this.searchPrescriptions = this.prescriptions
-      }
-    })
+    if (!this.isManage) {
+      this.$axios.post('http://localhost:3000/api/Stu/searchPrescription', { patientId: this.userId }).then(response => {
+        if (response.status === 200) {
+          this.prescriptions = response.data
+          this.prescriptions = this.prescriptions.sort((a, b) => b.date - a.date)
+          this.searchPrescriptions = this.prescriptions
+        }
+      })
+    } else {
+      this.$axios.get('http://localhost:3000/api/Manage/searchPrescription').then(response => {
+        if (response.status === 200) {
+          this.prescriptions = response.data
+          this.prescriptions = this.prescriptions.sort((a, b) => b.date - a.date)
+          this.searchPrescriptions = this.prescriptions
+        }
+      })
+    }
   },
   data() {
     return {
@@ -52,9 +63,7 @@ export default {
   },
   methods: {
     search() {
-      console.log(111)
       this.searchPrescriptions = this.prescriptions.filter(item => {
-        console.log(this.searchText, item.diagnosis.includes(this.searchText), item)
         return item.diagnosis.includes(this.searchText)
       })
     }
@@ -74,6 +83,8 @@ export default {
   background: white;
   width: 137%;
   margin-top: 10px;
+  border: 1px solid #e9e1e1;
+  box-shadow: 1px 1px 8px 1px #e7e6e6;
 }
 .prescription p {
   padding: 4px;

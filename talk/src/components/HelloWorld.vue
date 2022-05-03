@@ -142,7 +142,8 @@ export default {
           })
           // localStorage.removeItem("userId"); //退出登录，将localStorage的信息清除。没有登录无法再次进入
           // this.$router.push({ path: "/login" });
-          this.$router.push({ path: '/navigation/2/medicalKnowledge' })
+          // this.$router.push({ path: '/navigation/welcome' })
+          this.$router.go(-1)
         })
         .catch(action => {
           this.$message({
@@ -150,6 +151,9 @@ export default {
             message: action === 'cancel' ? '停留在该页面' : '您已取消'
           })
         })
+    },
+    beforeRouteEnter(to, from, next) {
+      console.log(to, from, next, 123)
     },
     //根据url(用户名)作为当前用户ID
     getUserID() {
@@ -360,6 +364,8 @@ export default {
   width: 100%;
   max-width: 700px;
   margin-left: -301px;
+  border: 1px solid #f1eded;
+  box-shadow: 1px 1px 16px 2px #f3f0f0;
 }
 .input-box input {
   height: 2.3rem;
@@ -401,7 +407,7 @@ export default {
   background: #409eff;
 }
 .welcome {
-  background-color: #fff;
+  background-color: #f4f4f4;
   position: fixed;
   right: 100px;
   top: 10%;
