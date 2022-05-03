@@ -1,3 +1,4 @@
+let date = new Date().getTime()
 // sqlMap.js  sql语句
 const sqlMap = {
   Stu: {
@@ -40,6 +41,10 @@ const sqlMap = {
     addPrescription: 'insert into prescription(prescriptionNumber,date,diagnosis,drugs,doctorId,patientId,isProduct) values(?,?,?,?,?,?,?)',
     searchPrescription: 'select * from onlinepatientinformation,prescription,doctor where onlinepatientinformation.userId=prescription.patientId and prescription.patientId = ? and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber and doctor.id=prescription.doctorId',
     addBill: 'insert into usermedicalmessage(doctorId,wellPayment,patientId,prescriptionNumber) values (?,?,?,?)'
+  },
+  manage: {
+    searchLogin: 'select * from manageLogin where name=?',
+    searchPrescription: 'select * from onlinepatientinformation,prescription,doctor where onlinepatientinformation.userId=prescription.patientId and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber and doctor.id=prescription.doctorId',
   }
 }
 
