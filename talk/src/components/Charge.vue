@@ -21,10 +21,11 @@ export default {
     this.$axios.post('http://localhost:3000/api/Stu/searchMedicalMessage', { userId }).then(response => {
       this.dataMessage = response.data
       this.haveWellPayment = this.dataMessage.some(item => item.wellPayment > 0)
-      this.dataMessage.map(item => {
+      this.dataMessage.map((item, index) => {
         this.$axios.post('http://localhost:3000/api/Stu/searchDoctorOfId', { id: item.doctorId }).then(res => {
-          if (res.status === 200) {
-            this.doctorName.push(res.data[0].name)
+          if (res.status === 200 && res.data[0]) {
+            console.log(res, 'res')
+            this.doctorName[index] = res.data[0].name
           }
         })
       })
@@ -39,6 +40,7 @@ export default {
   },
   methods: {
     goToMoney(message) {
+      message.id = message.patientId
       this.$router.push({ path: '/chargeMoney/' + message.patientId, name: 'ChargeMoney', params: message })
     }
   },
@@ -55,6 +57,8 @@ export default {
   background: white;
   padding: 10px;
   margin-top: 10px;
+  border: 1px solid #e7e7e7;
+  box-shadow: 1px 1px 5px 1px #ebe7e7;
 }
 .none {
   font-size: 100px;

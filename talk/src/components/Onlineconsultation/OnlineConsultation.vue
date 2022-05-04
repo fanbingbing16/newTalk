@@ -90,11 +90,19 @@ export default {
     },
     complete() {
       localStorage.setItem('prescriptionNumber', this.prescriptionNumber)
+      clearInterval(this.inter)
+      this.inter = null
       this.$router.push({ path: '/talkdoctor/' + this.selectDoctorObj.id })
     },
     endOnline() {
-      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: 'patient' })
-      this.showBaseMessage = true
+      this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: this.userId, endOf: 'patient' }).then(res => {
+        if (res) {
+          this.showBaseMessage = true
+          this.dialogVisible = false
+          this.showValidRz = false
+          this.onlineRecord = []
+        }
+      })
     },
     authentication(authentication) {
       this.showValidRz = false
@@ -166,6 +174,7 @@ img {
   margin: auto;
   padding-top: 10px;
   border: 1px solid #ece0e0;
+  box-shadow: 2px 2px 5px 0px #ededed;
 }
 .card:hover {
   background: rgb(230 230 230);

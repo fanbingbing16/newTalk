@@ -1,6 +1,6 @@
 <template>
   <div class="chat-box">
-    <el-button style="position: absolute; top: 10px; left: 800px" @click="$router.push({ path: '/navigation/1/medicalknowledge' })">返回</el-button>
+    <el-button style="position: absolute; top: 10px; left: 800px" @click="$router.push({ path: '/navigation/welcome' })">返回</el-button>
     <div class="msg-box" ref="msg-box">
       <div v-for="(i, index) in list" :key="index" class="msg" :style="(isDoctor === 'true' && i.talkFrom === i.doctorName) || (isDoctor !== 'true' && i.talkFrom === i.userName) ? 'flex-direction:row-reverse' : ''">
         <div class="user-head">
@@ -41,9 +41,6 @@
         </el-form-item>
         <el-form-item label="电话号码" prop="phone">
           <el-input :value="patientMessage.phone"></el-input>
-        </el-form-item>
-        <el-form-item label="地址" prop="address">
-          <el-input :value="patientMessage.address"></el-input>
         </el-form-item>
         <el-form-item label="上个医生的诊断书" prop="dignosis">
           <img :src="patientMessage.dignosis" alt="" />
@@ -415,6 +412,8 @@ export default {
   background: white;
   height: 500px;
   overflow-y: scroll;
+  border: 1px solid #e7e2e2;
+  box-shadow: 0px 1px 5px 0px #ececec;
 }
 .chat-box header {
   position: fixed;

@@ -59,7 +59,7 @@
         </el-menu>
       </el-col>
     </el-row>
-    <router-view></router-view>
+    <div class="content"><router-view></router-view></div>
   </div>
 </template>
 <script>
@@ -73,7 +73,7 @@ export default {
         { value: '2/medicalKnowledge', index: '1-2' },
         { value: 'onlineconsultation', index: '3-1' },
         { value: 'prescription', index: '3-2' },
-        { value: 'charge', index: '4' },
+        { value: 'reservation', index: '4' },
         { value: '/talk' + localStorage.getItem('userId'), index: '5' },
         { value: 'mengzheng', index: '6' },
         { value: 'prescription', index: '7' },
@@ -125,6 +125,7 @@ export default {
             localStorage.removeItem('userId')
             localStorage.removeItem('doctorId')
             localStorage.removeItem('authentication')
+            localStorage.removeItem('power')
             this.$router.push({ path: '/login' })
           })
           .catch(() => {
@@ -149,5 +150,10 @@ export default {
   position: absolute;
   right: 96px;
   top: 10px;
+}
+</style>
+<style scoped>
+.content {
+  margin-left: 300px;
 }
 </style>

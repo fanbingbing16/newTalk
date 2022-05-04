@@ -1,5 +1,8 @@
 <template>
-  <div class="welcome">首页</div>
+  <div class="welcome">
+    <p>首页</p>
+    <img src="../assets/doctor-sy.jpg" alt="" />
+  </div>
 </template>
 <style scoped>
 .welcome {

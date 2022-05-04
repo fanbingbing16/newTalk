@@ -21,6 +21,8 @@ import ManageLogin from '../components/manage/Login'
 import ManageNavigation from '../components/manage/Navigation'
 import ManagePrescription from '../components/manage/Prescription'
 import ManageMengZheng from '../components/manage/MengZheng'
+import ManageReservation from '../components/manage/Reservation'
+
 import App from '../App.vue'
 
 import Vue from 'vue'
@@ -76,7 +78,8 @@ const routes = [
       {
         path: 'prescription', component: ManagePrescription
       },
-      { path: 'mengzheng', component: ManageMengZheng }
+      { path: 'mengzheng', component: ManageMengZheng },
+      { path: 'reservation', component: ManageReservation },
     ]
   },
   { path: '/talkdoctor/:id', component: Talk, name: 'talkdoctor' },

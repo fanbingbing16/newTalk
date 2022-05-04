@@ -16,7 +16,7 @@ export default {
       }
     }, 1000)
     let params = this.$route.params
-    this.$axios.post('http://localhost:3000/api/Stu/updateMedicalMessage', { totalPay: parseInt(params.totalPay) + parseInt(params.wellPayment), wellPayyment: 0, date: params.prescriptionNumber })
+    this.$axios.post('http://localhost:3000/api/Stu/updateMedicalMessage', { totalPay: parseInt(params.totalPay) + parseInt(params.wellPayment), wellPayyment: 0, prescriptionNumber: params.prescriptionNumber })
   },
   data() {
     return {

@@ -18,6 +18,7 @@
     </el-form-item>
     <el-form-item>
       <el-button @click="DoctorLogin('ruleForm2')">医生登录</el-button>
+      <el-button @click="$router.push('/manage/login')">管理员</el-button>
     </el-form-item>
   </el-form>
 </template>

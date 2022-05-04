@@ -83,6 +83,7 @@ export default {
               this.$message.error('密码错误')
             } else {
               localStorage.setItem('userId', response.data[0].id)
+              localStorage.setItem('power', 'all')
               this.$router.push('/manage/navigation')
             }
           })

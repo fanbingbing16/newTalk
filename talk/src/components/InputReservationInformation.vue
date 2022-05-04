@@ -3,7 +3,7 @@
     <div class="background-grey"></div>
     <div class="model">
       <p>请您填写一下个人信息</p>
-      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px">
         <el-form-item label="使用医保卡?" prop="isMedicalInsuranceCard">
           <el-switch v-model="ruleForm.isMedicalInsuranceCard"></el-switch>
         </el-form-item>
@@ -183,7 +183,7 @@ export default {
 }
 </script>
 <style scoped>
-.background-grey {
+/* .background-grey {
   left: 0;
   width: 100%;
   height: 100%;
@@ -191,7 +191,7 @@ export default {
   background: grey;
   top: 0;
   opacity: 0.5;
-}
+} */
 .model {
   z-index: 111;
   padding: 10px;
