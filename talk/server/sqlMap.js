@@ -45,6 +45,12 @@ const sqlMap = {
   manage: {
     searchLogin: 'select * from manageLogin where name=?',
     searchPrescription: 'select * from onlinepatientinformation,prescription,doctor where onlinepatientinformation.userId=prescription.patientId and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber and doctor.id=prescription.doctorId',
+    addScheduling: 'insert into scheduling(date,name,id,doctorId,part,signalSource) values (?,?,?,?,?,?)',
+    searchOrder: 'select reservationInformation.*,talk.* from reservationInformation,talk where reservationInformation.userId = talk.userId',
+    editScheduling: 'update scheduling set date =?,signalSource=? where id=?',
+    deleteScheduling: 'delete from scheduling where id=?',
+    associationQuery: 'select doctor.*,scheduling.* from doctor,scheduling where doctor.id=? and doctor.id=scheduling.doctorId',
+
   }
 }
 

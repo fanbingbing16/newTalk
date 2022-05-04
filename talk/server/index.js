@@ -49,7 +49,7 @@ connection.query('select talkDoctor.*,doctor.* from talkDoctor,doctor where talk
     if (result) {
         let a = JSON.parse(JSON.stringify(result))
         chatList = a
-        console.log(a, 'a')
+        // console.log(a, 'a')
     }
 })
 

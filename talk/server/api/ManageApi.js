@@ -22,7 +22,7 @@ conn.connect()
 const jsonWrite = function (res, ret) {
   if (typeof ret === 'undefined') {
     res.json({
-      code: '1', msg: '操作失败'
+      code: '1', msg: res.msg
     })
   } else {
     res.json(
@@ -35,7 +35,6 @@ router.post('/login', (req, res) => {
   const sql = $sql.manage.searchLogin
   const params = req.body
   console.log('管理员登录', params)
-  // totalPay = ?,wellPayment = ? where id = ?
   conn.query(sql, [params.name], function (err, result) {
     if (err) {
       console.log(err)
@@ -51,7 +50,6 @@ router.post('/login', (req, res) => {
 router.get('/searchPrescription', (req, res) => {
   const sql = $sql.manage.searchPrescription
   const params = req.body
-  // totalPay = ?,wellPayment = ? where id = ?
   conn.query(sql, [], function (err, result) {
     if (err) {
       console.log(err)
@@ -78,4 +76,135 @@ router.get('/showAllDoctor', (req, res) => {
     }  // 
   })
 })
+// addScheduling
+//接口，增加医生排班信息
+router.post('/addScheduling', (req, res) => {
+  const sql = $sql.manage.addScheduling
+  const params = req.body
+  console.log('增加医生排班信息', params)
+  conn.query(`select * from scheduling where doctorId=?`, [params.doctorId], function (err1, result1) {
+    if (err1) {
+      console.log(err1)
+    }
+    if (result1) {
+      let a = JSON.parse(JSON.stringify(result1))
+      // 3600000*2
+      let boo = true
+      a.some(item => {
+        console.log(params.date, item.date, params.date - 3600000 * 2, 'date', params.date - 3600000 * 2 <= item.date, item.date <= params.date)
+        if (params.date - 3600000 * 2 <= item.date && item.date <= params.date) {
+          boo = false
+          return true
+        }
+      })
+      if (boo) {
+        let id = createId()
+        conn.query(sql, [params.date, params.name, id, params.doctorId, params.part, params.signalSource], function (err, result) {
+          if (err) {
+            console.log(err)
+          }
+          if (result) {
+            console.log(result, '增加排班信息')
+            jsonWrite(res, result)
+          }  // 
+        })
+      } else {
+        res.msg = '该时间段已经有排班了！'
+        jsonWrite(res)
+      }
+
+    }
+  })
+})
+
+// searchOrder
+//接口，查询所有的预约记录
+router.get('/searchOrder', (req, res) => {
+  const sql = $sql.manage.searchOrder
+  const params = req.body
+  console.log('查询所有的预约记录', params)
+  conn.query(sql, [], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
+// editScheduling
+//接口，修改排班信息
+router.post('/editScheduling', (req, res) => {
+  const sql = $sql.manage.editScheduling
+  const params = req.body
+  console.log('修改排班信息', params)
+  conn.query(`select * from scheduling where doctorId=?`, [params.doctorId], function (err1, result1) {
+    if (err1) {
+      console.log(err1)
+    }
+    if (result1) {
+      let a = JSON.parse(JSON.stringify(result1))
+      // 3600000*2
+      let boo = true
+      a.some(item => {
+        console.log(params.date, item.date, params.date - 3600000 * 2, 'date', params.date - 3600000 * 2 <= item.date, item.date <= params.date)
+        if (params.date - 3600000 * 2 <= item.date && item.date <= params.date) {
+          boo = false
+          return true
+        }
+      })
+      if (boo) {
+        conn.query(sql, [params.date, params.signalSource, params.id], function (err, result) {
+          if (err) {
+            console.log(err)
+          }
+          if (result) {
+            console.log(result)
+            jsonWrite(res, result)
+          }  // 
+        })
+      } else {
+        res.msg = '该时间段已经有排班了！'
+        jsonWrite(res)
+      }
+    }
+  })
+})
+
+//接口，删除排班信息
+router.post('/deleteScheduling', (req, res) => {
+  const sql = $sql.manage.deleteScheduling
+  const params = req.body
+  console.log('删除排班信息', params)
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
+// 接口：根据id查询医生,查找的是两个表的，还有排班表
+router.post('/associationQuery', (req, res) => {
+  const sql = $sql.manage.associationQuery
+  const params = req.body
+  console.log('查询医生 id 包括排班表', params)
+  if (!params.id) {
+    throw new Error('id必须传')
+  }
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
 module.exports = router
