@@ -20,6 +20,7 @@ export default {
     let userId = localStorage.getItem('userId')
     this.$axios.post('http://localhost:3000/api/Stu/searchMedicalMessage', { userId }).then(response => {
       this.dataMessage = response.data
+      console.log(response)
       this.haveWellPayment = this.dataMessage.some(item => item.wellPayment > 0)
       this.dataMessage.map((item, index) => {
         this.$axios.post('http://localhost:3000/api/Stu/searchDoctorOfId', { id: item.doctorId }).then(res => {

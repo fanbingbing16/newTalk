@@ -12,6 +12,7 @@
         </el-table-column>
         <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
         <el-table-column prop="signalSource" label="号源" width="180"> </el-table-column>
+        <el-table-column prop="part" label="科室" width="180"> </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
             <el-button @click="addMz(scope.row)">修改</el-button>
@@ -28,18 +29,12 @@
         <el-form-item label="医生职称" label-width="80px"><el-input type="text" v-model="selectDoctor.title" :disabled="true"></el-input></el-form-item>
         <el-form-item label="医生号源" label-width="80px"> <el-input-number v-model="addForm.signalSource" :min="1" :max="25" label="选择号源"></el-input-number> </el-form-item>
         <el-form-item label="选择日期" label-width="80px"><el-date-picker :picker-options="pickerOptions" v-model="addForm.date" placeholder="选择日期时间"> </el-date-picker></el-form-item>
-        <el-form-item label="选择时间" label-width="80px"
-          ><el-time-select
-            v-model="addForm.time"
-            :picker-options="{
-              start: '08:30',
-              step: '00:15',
-              end: '18:30'
-            }"
-            placeholder="选择时间"
-          >
-          </el-time-select
-        ></el-form-item>
+        <el-form-item label="选择时间" label-width="80px">
+          <el-select v-model="addForm.time" clearable filterable placeholder="请选择">
+            <el-option label="上午" value="08:30:00"> </el-option>
+            <el-option label="下午" value="13:30:00"> </el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
@@ -49,7 +44,7 @@
   </div>
 </template>
 <script>
-import { getDetailTime } from '../getTime'
+import { getTimeOfFour } from '../getTime'
 export default {
   name: 'ManageMengZheng',
   created() {
@@ -158,7 +153,7 @@ export default {
           })
       } else {
         this.$axios
-          .post('http://localhost:3000/api/Manage/editScheduling', { date, id: this.row.id, signalSource: this.addForm.signalSource })
+          .post('http://localhost:3000/api/Manage/editScheduling', { date, id: this.row.id, signalSource: this.addForm.signalSource, doctorId: this.selectDoctor.id })
           .then(res => {
             console.log(res, 'edit')
             if (res.status === 200) {
@@ -204,7 +199,7 @@ export default {
         this.dialogTitle = '修改'
         let date = new Date(row.date)
         this.addForm.date = date
-        this.addForm.time = `${date.getHours() >= 10 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() >= 10 ? date.getMinutes() : '0' + date.getMinutes()}`
+        this.addForm.time = date.getHours() >= 4 && date.getHours() <= 12 ? '08:30:00' : '13:30:00'
         this.addForm.signalSource = row.signalSource
       } else this.dialogTitle = '新增'
       if (!this.selectDoctor.id) {
@@ -216,7 +211,7 @@ export default {
   },
   filters: {
     filterTime(data) {
-      return getDetailTime(data)
+      return getTimeOfFour(data)
     }
   }
 }

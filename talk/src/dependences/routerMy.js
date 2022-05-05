@@ -16,13 +16,14 @@ import RegisterDoctor from '../components/RegisterDoctor'
 import Reservation from '../components/Reservation'
 import History from '../components/Onlineconsultation/History'
 import Prescription from '../components/Prescription'
+import DoctorMz from '../components/DoctorMz'
 import Welcome from '../components/Welcome'
 import ManageLogin from '../components/manage/Login'
 import ManageNavigation from '../components/manage/Navigation'
 import ManagePrescription from '../components/manage/Prescription'
 import ManageMengZheng from '../components/manage/MengZheng'
 import ManageReservation from '../components/manage/Reservation'
-
+import DoctorManage from '../components/manage/DoctorManage'
 import App from '../App.vue'
 
 import Vue from 'vue'
@@ -65,6 +66,7 @@ const routes = [
       {
         path: 'prescription', component: Prescription
       },
+      { path: 'doctorMz', component: DoctorMz },
       {
         path: 'welcome', component: Welcome
       }
@@ -80,6 +82,7 @@ const routes = [
       },
       { path: 'mengzheng', component: ManageMengZheng },
       { path: 'reservation', component: ManageReservation },
+      { path: 'doctor', component: DoctorManage }
     ]
   },
   { path: '/talkdoctor/:id', component: Talk, name: 'talkdoctor' },

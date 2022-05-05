@@ -67,6 +67,10 @@
             <i class="el-icon-setting"></i>
             <span slot="title">电子处方</span>
           </el-menu-item>
+          <el-menu-item index="8" v-if="isDoctor === 'true'">
+            <i class="el-icon-setting"></i>
+            <span slot="title">值班表</span>
+          </el-menu-item>
         </el-menu>
       </el-col>
     </el-row>
@@ -87,6 +91,7 @@ export default {
         { value: '/talk' + localStorage.getItem('userId'), index: '5' },
         { value: 'reservation', index: '6' },
         { value: 'prescription', index: '7' },
+        { value: 'doctorMz', index: '8' },
         { value: 'welcome', index: '0' }
       ],
       curentMenu: '1-1',
@@ -137,6 +142,7 @@ export default {
             localStorage.removeItem('doctorId')
             localStorage.removeItem('authentication')
             localStorage.removeItem('isDoctor')
+            localStorage.removeItem('prescriptionNumber')
             this.$router.push({ path: '/login' })
           })
           .catch(() => {

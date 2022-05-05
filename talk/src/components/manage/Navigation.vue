@@ -32,11 +32,8 @@
           <el-submenu index="3">
             <template slot="title">
               <i class="el-icon-setting"></i>
-              <span slot="title">处方</span>
+              <span slot="title">处方管理</span>
             </template>
-            <el-menu-item-group index="3">
-              <el-menu-item index="3-1"><i class="el-icon-setting"></i> <span slot="title">开处方</span></el-menu-item>
-            </el-menu-item-group>
             <el-menu-item-group index="3">
               <el-menu-item index="3-2">
                 <i class="el-icon-setting"></i>
@@ -69,8 +66,7 @@ export default {
     return {
       menuArr: [
         { value: 'mengzhengpaiban', index: '2-1' },
-        { value: '1/medicalKnowledge', index: '1-1' },
-        { value: '2/medicalKnowledge', index: '1-2' },
+        { value: 'doctor', index: '1-1' },
         { value: 'onlineconsultation', index: '3-1' },
         { value: 'prescription', index: '3-2' },
         { value: 'reservation', index: '4' },
@@ -126,6 +122,7 @@ export default {
             localStorage.removeItem('doctorId')
             localStorage.removeItem('authentication')
             localStorage.removeItem('power')
+            localStorage.removeItem('prescriptionNumber')
             this.$router.push({ path: '/login' })
           })
           .catch(() => {

@@ -29,6 +29,11 @@
     <div class="background-grey" v-if="dialogVisible"></div>
     <el-dialog title="开处方" :visible.sync="dialogVisible" width="30%" :before-close="cancle" style="margin-top: -80px; height: 700px; overflow-y: scroll">
       <el-form ref="Form" :rules="rules" status-icon :model="prescription" label-width="100px">
+        <el-form-item label="病人" prop="diagnosis">
+          <el-select v-model="prescription.patientId" clearable filterable placeholder="请选择">
+            <el-option v-for="item in patientOptions" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="诊断" prop="diagnosis">
           <el-input v-model="prescription.diagnosis"></el-input>
         </el-form-item>
@@ -80,7 +85,7 @@
             <el-radio label="否"></el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="线上问诊费用" prop="money" style="margin-top: 10px">
+        <el-form-item label="额外费用" prop="money" style="margin-top: 10px">
           <el-input v-model="prescription.money"></el-input>
         </el-form-item>
         <el-form-item label="总费用" prop="totalPay">
@@ -113,10 +118,32 @@ export default {
         if (response.status === 200) {
           this.prescriptions = response.data
           this.prescriptions = this.prescriptions.sort((a, b) => b.date - a.date)
+          this.prescriptions = this.prescriptions.map(pre => {
+            if (!pre.userName) {
+              let result = this.getUserName(pre.patientId)
+              console.log(result, 'result')
+              result.then(res => {
+                if (res.data[0]) {
+                  pre.userName = res.data[0].real_name || res.data[0].userName
+                } else {
+                  pre.userName = ''
+                }
+              })
+            }
+            return pre
+          })
           this.searchPrescriptions = this.prescriptions
         }
       })
     }
+    this.$axios.get('http://localhost:3000/api/Stu/showStu').then(res => {
+      console.log(res, '用户')
+      if (res.status === 200) {
+        res.data.map(data => {
+          this.patientOptions.push({ label: data.real_name || data.userName, value: data.userId })
+        })
+      }
+    })
   },
   watch: {
     prescription: {
@@ -134,6 +161,10 @@ export default {
   },
   data() {
     return {
+      patientOptions: [],
+      rules: {
+        diagnosis: [{ required: true, message: '请输入诊断结果', trigger: 'blur' }]
+      },
       // 处方
       prescription: {
         diagnosis: '',
@@ -157,13 +188,19 @@ export default {
     }
   },
   methods: {
+    async getUserName(id) {
+      let result
+      result = await this.$axios.post('http://localhost:3000/api/Stu/showOfId', { userId: id })
+      return result
+    },
     //确定开处方
     // prescription
     prescriptionAdd() {
+      let prescriptionNumber = new Date().getTime() + 2000000 + Math.floor(Math.random() * 100000)
       let message = {
         doctorId: this.userId,
-        patientId: location.hash.split('/').slice(-1)[0],
-        prescriptionNumber: this.prescriptionNumber,
+        patientId: this.prescription.patientId,
+        prescriptionNumber: prescriptionNumber,
         date: Date.now(),
         wellPayment: this.prescription.totalPay,
         diagnosis: this.prescription.diagnosis,
@@ -173,24 +210,7 @@ export default {
       this.$axios.post('http://localhost:3000/api/Stu/addPrescription', message).then(response => {
         if (response.status === 200) {
           this.dialogVisible = false
-          this.$confirm('是否结束此次线上问诊?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          })
-            .then(() => {
-              this.$axios.post('http://localhost:3000/api/Stu/endTalk', { userId: location.hash.split('/').slice(-1)[0], endOf: 'doctor' }).then(response => {
-                if (response.status === 200) {
-                  this.$router.push('/navigation')
-                }
-              })
-            })
-            .catch(() => {
-              this.$message({
-                type: 'info',
-                message: '继续进行线上问诊'
-              })
-            })
+          this.$message.success('开处方成功')
         }
       })
     },

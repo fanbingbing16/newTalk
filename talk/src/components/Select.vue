@@ -97,6 +97,7 @@ export default {
           localStorage.removeItem('doctorId')
           localStorage.removeItem('authentication')
           localStorage.removeItem('isDoctor')
+          localStorage.removeItem('prescriptionNumber')
           this.$router.push({ path: '/login' })
         })
         .catch(() => {
