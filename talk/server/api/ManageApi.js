@@ -91,10 +91,17 @@ router.post('/addScheduling', (req, res) => {
       // 3600000*2
       let boo = true
       a.some(item => {
-        console.log(params.date, item.date, params.date - 3600000 * 2, 'date', params.date - 3600000 * 2 <= item.date, item.date <= params.date)
-        if (params.date - 3600000 * 2 <= item.date && item.date <= params.date) {
-          boo = false
-          return true
+        let date1 = new Date(params.date)
+        let date2 = new Date(item.date)
+        console.log(date1, date2, date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate(), date1.getHours() >= 4 && date2.getHours() >= 4 && date1.getHours() <= 12 && date2.getHours() <= 12, date1.getHours() > 12 && date2.getHours() > 12)
+        if (date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate()) {
+          if (date1.getHours() >= 4 && date2.getHours() >= 4 && date1.getHours() <= 12 && date2.getHours() <= 12) {
+            boo = false
+            return true
+          } else if (date1.getHours() > 12 && date2.getHours() > 12) {
+            boo = false
+            return true
+          }
         }
       })
       if (boo) {
@@ -146,13 +153,19 @@ router.post('/editScheduling', (req, res) => {
     }
     if (result1) {
       let a = JSON.parse(JSON.stringify(result1))
-      // 3600000*2
       let boo = true
       a.some(item => {
-        console.log(params.date, item.date, params.date - 3600000 * 2, 'date', params.date - 3600000 * 2 <= item.date, item.date <= params.date)
-        if (params.date - 3600000 * 2 <= item.date && item.date <= params.date) {
-          boo = false
-          return true
+        let date1 = new Date(params.date)
+        let date2 = new Date(item.date)
+        console.log(date1, date2, date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate(), date1.getHours() >= 4 && date2.getHours() >= 4 && date1.getHours() <= 12 && date2.getHours() <= 12, date1.getHours() > 12 && date2.getHours() > 12)
+        if (date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate()) {
+          if (date1.getHours() >= 4 && date2.getHours() >= 4 && date1.getHours() <= 12 && date2.getHours() <= 12) {
+            boo = false
+            return true
+          } else if (date1.getHours() > 12 && date2.getHours() > 12) {
+            boo = false
+            return true
+          }
         }
       })
       if (boo) {
@@ -202,6 +215,22 @@ router.post('/associationQuery', (req, res) => {
       throw new Error(err)
     }
     if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
+// searchDoctorDoctorUser
+//接口，查询全部医生
+router.get('/searchDoctorDoctorUser', (req, res) => {
+  const sql = $sql.manage.searchDoctorDoctorUser
+  const params = req.body
+  conn.query(sql, [], function (err, result) {
+    if (err) {
+      console.log(err)
+    }
+    if (result) {
+      console.log(result)
       jsonWrite(res, result)
     }  // 
   })

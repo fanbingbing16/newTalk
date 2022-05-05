@@ -11,6 +11,7 @@ const sqlMap = {
     showAllDoctor: 'select * from doctor',
     searchDoctorOfId: 'select * from doctor where id = ?',
     searchSchedu: 'select * from scheduling where part=? and date > ? and date < ?',
+    searchScheduFromId: 'select * from scheduling where doctorId=? and date>? and date< ?',
     searchScheduOfTime: 'select * from scheduling where date > ? and date < ?',
     associationQuery: 'select doctor.*,scheduling.date,scheduling.signalSource from doctor,scheduling where doctor.id=? and doctor.id=scheduling.doctorId;',
     searchKnowledge: 'select * from knowledge',
@@ -44,13 +45,13 @@ const sqlMap = {
   },
   manage: {
     searchLogin: 'select * from manageLogin where name=?',
-    searchPrescription: 'select * from onlinepatientinformation,prescription,doctor where onlinepatientinformation.userId=prescription.patientId and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber and doctor.id=prescription.doctorId',
+    searchPrescription: 'select *,prescription.prescriptionNumber as prescriptionNumber,onlinepatientinformation.prescriptionNumber as oPrescriptionNumber from prescription left join onlinepatientinformation on onlinepatientinformation.userId=prescription.patientId and  prescription.prescriptionNumber = onlinepatientinformation.prescriptionNumber left join doctor on doctor.id=prescription.doctorId',
     addScheduling: 'insert into scheduling(date,name,id,doctorId,part,signalSource) values (?,?,?,?,?,?)',
     searchOrder: 'select reservationInformation.*,talk.* from reservationInformation,talk where reservationInformation.userId = talk.userId',
     editScheduling: 'update scheduling set date =?,signalSource=? where id=?',
     deleteScheduling: 'delete from scheduling where id=?',
     associationQuery: 'select doctor.*,scheduling.* from doctor,scheduling where doctor.id=? and doctor.id=scheduling.doctorId',
-
+    searchDoctorDoctorUser: 'select * from doctor,doctorUser where doctor.id=doctorUser.id'
   }
 }
 

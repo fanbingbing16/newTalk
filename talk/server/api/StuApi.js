@@ -179,6 +179,23 @@ router.post('/associationQuery', (req, res) => {
     }  // 
   })
 })
+
+// searchScheduFromId
+// 接口：根据医生id查询排班表，时间查询是本周内
+router.post('/searchScheduFromId', (req, res) => {
+  const sql = $sql.Stu.searchScheduFromId
+  const params = req.body
+  console.log('根据医生id查询排班表，时间查询是本周内', params)
+  conn.query(sql, [params.doctorId, params.startTime, params.endTime], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
 // 接口：根据时间和科室或者就时间查找排班信息
 router.post('/searchSchedu', (req, res) => {
   const params = req.body
