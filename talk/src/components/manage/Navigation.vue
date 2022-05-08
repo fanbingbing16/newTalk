@@ -17,18 +17,6 @@
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-document"></i>
-              <span slot="title">药品管理</span>
-            </template>
-            <el-menu-item-group index="2">
-              <el-menu-item index="2-1">
-                <i class="el-icon-menu"></i>
-                <span slot="title">门诊排班</span>
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
           <el-submenu index="3">
             <template slot="title">
               <i class="el-icon-setting"></i>
@@ -44,10 +32,6 @@
           <el-menu-item index="4">
             <i class="el-icon-setting"></i>
             <span slot="title">预约记录</span>
-          </el-menu-item>
-          <el-menu-item index="5">
-            <i class="el-icon-setting"></i>
-            <span slot="title">聊天室</span>
           </el-menu-item>
           <el-menu-item index="6">
             <i class="el-icon-setting"></i>

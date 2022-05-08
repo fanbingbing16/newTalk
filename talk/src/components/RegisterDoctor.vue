@@ -49,7 +49,7 @@
         <el-option v-for="item in schedule" :key="item.part" :label="item.part" :value="item.part"></el-option>
       </el-select>
     </el-form-item>
-    <el-form-item>
+    <el-form-item v-if="!isManage">
       <el-button type="primary" @click="returnLogin">返回</el-button>
       <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
       <el-button @click="resetForm('ruleForm2')">重置</el-button>
@@ -60,6 +60,7 @@
 import { validateSfz } from './validateSfz.js'
 import { schedule } from './part.js'
 export default {
+  props: ['isManage'],
   data() {
     var checkText = (rule, value, callback) => {
       if (!value) {
@@ -210,6 +211,16 @@ export default {
     },
     returnLogin() {
       this.$router.push({ path: '/login' })
+    }
+  },
+  watch: {
+    ruleForm2: {
+      handler(newVal) {
+        this.$refs['ruleForm2'].validate(valid => {
+          if (valid) this.$emit('getForm', newVal)
+        })
+      },
+      deep: true
     }
   }
 }
