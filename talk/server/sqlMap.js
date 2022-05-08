@@ -51,7 +51,11 @@ const sqlMap = {
     editScheduling: 'update scheduling set date =?,signalSource=? where id=?',
     deleteScheduling: 'delete from scheduling where id=?',
     associationQuery: 'select doctor.*,scheduling.* from doctor,scheduling where doctor.id=? and doctor.id=scheduling.doctorId',
-    searchDoctorDoctorUser: 'select * from doctor,doctorUser where doctor.id=doctorUser.id'
+    searchDoctorDoctorUser: 'select * from doctor,doctorUser where doctor.id=doctorUser.id',
+    editDoctor: 'update doctor,doctorUser set doctorUser.email=? ,doctorUser.phone=?, doctor.part=?,doctor.title=?,doctor.sex=?,doctor.image=?,doctor.detail=? where doctor.id=? and doctor.id=doctorUser.id',
+    deleteDoctor: 'delete from doctor where doctor.id=? ',
+    deleteDoctorUser: 'delete from doctorUser where doctorUser.id=? '
+
   }
 }
 

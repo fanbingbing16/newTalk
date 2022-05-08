@@ -236,4 +236,51 @@ router.get('/searchDoctorDoctorUser', (req, res) => {
   })
 })
 
+// editDoctor
+// 接口：修改医生信息
+router.post('/editDoctor', (req, res) => {
+  const sql = $sql.manage.editDoctor
+  const params = req.body
+  console.log('修改医生信息', params)
+  if (!params.id) {
+    throw new Error('id必须传')
+  }
+  conn.query(sql, [params.email, params.phone, params.part, params.title, params.sex, params.image, params.detail, params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      jsonWrite(res, result)
+    }  // 
+  })
+})
+
+// deleteDoctor
+// 接口：删除医生
+router.post('/deleteDoctor', (req, res) => {
+  const sql = $sql.manage.deleteDoctor
+  const sql2 = $sql.manage.deleteDoctorUser
+
+  const params = req.body
+  console.log('删除医生信息', params)
+  if (!params.id) {
+    throw new Error('id必须传')
+  }
+  conn.query(sql, [params.id], function (err, result) {
+    if (err) {
+      throw new Error(err)
+    }
+    if (result) {
+      conn.query(sql2, [params.id], function (err, result) {
+        if (err) {
+          throw new Error(err)
+        }
+        if (result) {
+          jsonWrite(res, result)
+        }
+      })
+    }  // 
+  })
+})
+
 module.exports = router
